@@ -1,0 +1,1 @@
+mysqldump -u root -p"xapxinh$db" iforex > iforex.sql

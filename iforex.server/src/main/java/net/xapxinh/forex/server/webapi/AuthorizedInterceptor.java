@@ -1,4 +1,4 @@
-package net.xapxinh.forex.server.webmvc;
+package net.xapxinh.forex.server.webapi;
 
 import java.io.IOException;
 

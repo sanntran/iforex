@@ -1,4 +1,4 @@
-package net.xapxinh.forex.server.webmvc;
+package net.xapxinh.forex.server.webapi;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

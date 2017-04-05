@@ -18,13 +18,13 @@
 	<import resource="data-access.xml"/>
 	
 	<mvc:annotation-driven/>
-	<context:component-scan base-package="net.xapxinh.forex.server.webmvc" />
+	<context:component-scan base-package="net.xapxinh.forex.server.webapi" />
 	
 	<mvc:interceptors>
 	  <mvc:interceptor>
             <mvc:mapping path="/**"/>
             <mvc:exclude-mapping path="/decisions/**"/>
-            <bean class="net.xapxinh.forex.server.webmvc.AuthorizedInterceptor"></bean>
+            <bean class="net.xapxinh.forex.server.webapi.AuthorizedInterceptor"></bean>
         </mvc:interceptor>  	
     </mvc:interceptors> 
     

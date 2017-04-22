@@ -21,7 +21,7 @@ public class DecisionServiceController {
 			method = RequestMethod.GET,
 			produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String geDecisions(
+	public String getDecisions(
 			@RequestParam("symbol") String symbol,
 			@RequestParam(name="ticktime", required=false) String tickTime,
 			@RequestParam(name="tickbid", required=false) double tickBid,
@@ -36,7 +36,16 @@ public class DecisionServiceController {
 			@RequestParam("barvolume") String barVolume,
 			HttpServletRequest request) {
 		
-		LOGGER.info("Symbol: " + symbol + " Time: " + tickTime  + " Price: " + tickLast);
+		System.out.println(
+				"Symbol: " + symbol + 
+				" Time: " + tickTime  + 
+				" Price: " + tickLast +
+				" barTime: " + barTime + 
+				" barOpen: " + barOpen + 
+				" barHigh: " + barHigh + 
+				" barLow: " + barLow + 
+				" barClose: " + barClose + 
+				" barVolume: " + barVolume);
 		return "200";
 	}
 }

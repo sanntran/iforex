@@ -214,7 +214,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</build>  
 
 	<properties>
 		<spring.version>4.2.1.RELEASE</spring.version>

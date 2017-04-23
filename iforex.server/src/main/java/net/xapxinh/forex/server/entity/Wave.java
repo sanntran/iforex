@@ -2,17 +2,17 @@ package net.xapxinh.forex.server.entity;
 
 import java.util.List;
 
-public class Wave extends Pojo {
+public abstract class Wave extends Pojo {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private List<Candle> candles;
+	private List<WaveCandle> waveCandles;
 
-	public List<Candle> getCandles() {
-		return candles;
+	public List<WaveCandle> getWaveCandles() {
+		return waveCandles;
 	}
 
-	public void setCandles(List<Candle> candles) {
-		this.candles = candles;
+	public void setWaveCandles(List<WaveCandle> waveCandles) {
+		this.waveCandles = waveCandles;
 	}
 }

@@ -6,8 +6,50 @@ public class Candle extends Pojo {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public enum PERIOD {
+		M1(1), M5(2), M15(3), M30(4), H1(5), H4(6), D1(7), W1(8), MN1(9);
+		
+		private final int value;
+		
+		private PERIOD(int value) {
+			this.value = value;
+		}
+		
+		public int getValue() {
+			return this.value;
+		}
+		
+		public static PERIOD parse(int period) {
+			if (M1.getValue() == period) {
+				return M1;
+			}
+			if (M5.getValue() == period) {
+				return M5;
+			}
+			if (M15.getValue() == period) {
+				return M15;
+			}
+			if (M30.getValue() == period) {
+				return M30;
+			}
+			if (H1.getValue() == period) {
+				return H1;
+			}
+			if (H4.getValue() == period) {
+				return H4;
+			}
+			if (D1.getValue() == period) {
+				return D1;
+			}
+			throw new NumberFormatException("Invalid period number value: " + period);
+		}
+		
+		public static String getName(int period) {
+			return parse(period).toString();
+		}
+	}
+	
 	private Date time;
-	private int period;
 	private double high;
 	private double low;
 	private double open;
@@ -19,13 +61,6 @@ public class Candle extends Pojo {
 	}
 	public void setTime(Date time) {
 		this.time = time;
-	}
-	
-	public int getPeriod() {
-		return period;
-	}
-	public void setPeriod(int period) {
-		this.period = period;
 	}
 	
 	public double getHigh() {

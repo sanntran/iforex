@@ -10,11 +10,30 @@
 		<id name="id" type="long" column="id">
 			<generator class="native" />
 		</id>
-		
-		<property name="name">
-			<column name="name" />
-		</property>
         
+        <property name="time">
+			<column name="time" sql-type="datetime"/>
+		</property>
+				
+		<property name="high">
+			<column name="high" />
+		</property>
+		
+		<property name="close">
+			<column name="close" />
+		</property>
+		
+		<property name="low">
+			<column name="low" />
+		</property>
+		
+		<property name="open">
+			<column name="open" />
+		</property>
+		
+		<property name="volume">
+			<column name="volume" />
+		</property>
 	</class>
 	
 </hibernate-mapping>

@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface IPersistence<T> {
 
+	public T save(T entity);
+	
 	public T insert(T entity);
 
 	public T update(T entity);

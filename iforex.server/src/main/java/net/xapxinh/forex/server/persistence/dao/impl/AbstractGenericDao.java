@@ -1,6 +1,5 @@
 package net.xapxinh.forex.server.persistence.dao.impl;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -10,11 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Preconditions;
 
+import net.xapxinh.forex.server.entity.Pojo;
 import net.xapxinh.forex.server.persistence.dao.IGenericDao;
 
 @Transactional
 @SuppressWarnings("unchecked")
-public class AbstractGenericDao<T extends Serializable> implements IGenericDao<T> {
+public class AbstractGenericDao<T extends Pojo> implements IGenericDao<T> {
 
 	protected static final String DATE_TIME = "dateTime";
 	protected static final String MESSAGE = "message";
@@ -30,7 +30,18 @@ public class AbstractGenericDao<T extends Serializable> implements IGenericDao<T
 	protected final void setClass(final Class<T> clasz) {
 		clazz = Preconditions.checkNotNull(clasz);
 	}
-
+	
+	@Override
+	public T save(T entity) {
+		Preconditions.checkNotNull(entity);
+		if (entity.isNew()) {
+			return insert(entity);
+		}
+		else {
+			return update(entity);
+		}
+	}
+	
 	@Override
 	public T insert(T entity) {
 		Preconditions.checkNotNull(entity);

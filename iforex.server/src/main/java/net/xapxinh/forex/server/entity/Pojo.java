@@ -23,16 +23,8 @@ public class Pojo implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public String getSId() {
-		return "#" + id;
-	}
-
-	public String getNameId() {
-		return name + " #" + id;
-	}
 	
 	public boolean isNew() {
-		return id != DEFAULT_ID;
+		return id == DEFAULT_ID;
 	}
 }

@@ -12,12 +12,8 @@ import net.xapxinh.forex.server.persistence.service.IGenericService;
 public abstract class AbstractGenericService<T extends Serializable> implements IGenericService<T> {
 
 	@Override
-	public List<T> loadAll() {
-		return getDao().loadAll();
-	}
-	@Override
-	public T findById(final long id) {
-		return getDao().findById(id);
+	public T save(T entity) {
+		return getDao().save(entity);
 	}
 	@Override
 	public T insert(final T entity) {
@@ -32,9 +28,16 @@ public abstract class AbstractGenericService<T extends Serializable> implements 
 		getDao().delete(entity);
 	}
 	@Override
+	public T findById(final long id) {
+		return getDao().findById(id);
+	}
+	@Override
 	public void deleteById(final long entityId) {
 		getDao().deleteById(entityId);
 	}
-
+	@Override
+	public List<T> loadAll() {
+		return getDao().loadAll();
+	}
 	protected abstract IGenericDao<T> getDao();
 }

@@ -26,10 +26,10 @@
 	   	<!-- configuration pool via c3p0 -->
 	   	<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>	   	
 	   	<property name= "hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>   
-	   	<property name="hibernate.connection.url">jdbc:mysql://localhost/hcloud?autoReconnect=true&amp;characterEncoding=UTF-8</property>
+	   	<property name="hibernate.connection.url">jdbc:mysql://localhost/iforex?autoReconnect=true&amp;characterEncoding=UTF-8</property>
 	   	<property name="hibernate.connection.username">root</property>
-	   	<property name="hibernate.connection.password">xapxinh$db</property>	   	
-	   	<property name="hibernate.default_schema">ionoff</property>
+	   	<property name="hibernate.connection.password">ionoff$db</property>	   	
+	   	<property name="hibernate.default_schema">iforex</property>
 	   	
 	   	<property name= "hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
 	   	<property name="hibernate.c3p0.acquire_increment">5</property>
@@ -40,6 +40,26 @@
 	   	<property name="hibernate.c3p0.timeout">1800</property>
 		
 		<!-- Mapping files -->
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM5Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM15Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM30Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdH1Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdH4Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdD1Candle.hbm.xml"/>
+		
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM5Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM15Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM30Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH1Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH4Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdD1Wave.hbm.xml"/>
+		
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM5WaveCandle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM15WaveCandle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM30WaveCandle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH1WaveCandle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH4WaveCandle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdD1WaveCandle.hbm.xml"/>
 		
 	</session-factory>
 </hibernate-configuration>

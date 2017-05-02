@@ -30,4 +30,10 @@
     
     <bean id="appContext" class="net.xapxinh.forex.server.AppContext" />
 
+	<bean id="candleEventListener" class="net.xapxinh.forex.server.event.CandleEventListener" />
+	
+	<bean id="candleEventNotifier" class="net.xapxinh.forex.server.event.CandleEventNotifier" >
+		<constructor-arg ref="candleEventListener" />
+	</bean>
+    
 </beans>

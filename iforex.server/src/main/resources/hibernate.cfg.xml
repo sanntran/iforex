@@ -54,12 +54,5 @@
 		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH4Wave.hbm.xml"/>
 		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdD1Wave.hbm.xml"/>
 		
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM5WaveCandle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM15WaveCandle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM30WaveCandle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH1WaveCandle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH4WaveCandle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdD1WaveCandle.hbm.xml"/>
-		
 	</session-factory>
 </hibernate-configuration>

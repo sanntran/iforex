@@ -3,9 +3,12 @@ package net.xapxinh.forex.server.persistence.service.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.xapxinh.forex.server.entity.Candle;
+import net.xapxinh.forex.server.event.CandleEventNotifier;
+import net.xapxinh.forex.server.event.CandleInsertedEvent;
 import net.xapxinh.forex.server.persistence.dao.ICandleDao;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
 
@@ -14,10 +17,23 @@ public class CandleServiceImpl extends AbstractGenericService<Candle> implements
 
 	private ICandleDao candleDao;
 	
-	
+	@Autowired
+	private CandleEventNotifier candleEventNotifier;
 	
 	public CandleServiceImpl(ICandleDao candleDao) {
 		this.candleDao = candleDao;
+	}
+	
+	@Override
+	public Candle save(Candle entity) {
+		if (entity.isNew()) {
+			getDao().insert(entity);
+			candleEventNotifier.notifyListeners(new CandleInsertedEvent(entity));
+		}
+		else {
+			getDao().update(entity);
+		}
+		return entity;
 	}
 
 	@Override

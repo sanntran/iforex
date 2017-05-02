@@ -15,12 +15,6 @@
 			<column name="name" />
 		</property>
 		
-        <bag name="waveCandles" table="eur_usd_m15_waves_candles" inverse="true" lazy="true"
-			fetch="select" order-by="id">
-			<key column="wave_id" not-null="true">
-			</key>
-			<one-to-many entity-name="net.xapxinh.forex.server.entity.wave.EurUsdM15WaveCandle" />
-		</bag>
 		
 	</class>
 	

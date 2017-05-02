@@ -6,13 +6,13 @@ public abstract class Wave extends Pojo {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private List<WaveCandle> waveCandles;
+	private List<Candle> candles;
 
-	public List<WaveCandle> getWaveCandles() {
-		return waveCandles;
+	public List<Candle> getCandles() {
+		return candles;
 	}
 
-	public void setWaveCandles(List<WaveCandle> waveCandles) {
-		this.waveCandles = waveCandles;
+	public void setCandles(List<Candle> candles) {
+		this.candles = candles;
 	}
 }

@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import net.xapxinh.forex.server.entity.Symbol;
+import net.xapxinh.forex.server.entity.candle.EurUsdH1Candle;
+import net.xapxinh.forex.server.entity.candle.EurUsdM15Candle;
+import net.xapxinh.forex.server.entity.candle.EurUsdM30Candle;
 import net.xapxinh.forex.server.entity.candle.EurUsdM5Candle;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
 
@@ -24,11 +27,11 @@ import net.xapxinh.forex.server.persistence.service.ICandleService;
 public class TickServiceController {
 
 	private static final Logger LOGGER = Logger.getLogger(TickServiceController.class.getName());
-	private static final SimpleDateFormat MT4_DATE_FORMAT =  new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-	
+	private static final SimpleDateFormat MT4_DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+
 	@Autowired
 	private ICandleService candleService;
-	
+
 	@RequestMapping(value = "/ticks", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public String onTick(@RequestParam("symbol") String symbol,
@@ -64,10 +67,9 @@ public class TickServiceController {
 				+ m5BarTime + " m5BarOpen: " + m5BarOpen + " m5BarHigh: " + m5BarHigh + " m5BarLow: " + m5BarLow
 				+ " m5BarClose: " + m5BarClose + " m5BarVolume: " + m5BarVolume);
 
-		
 		if (Symbol.EURUSD.equals(symbol)) {
 			Date m5BarDate = MT4_DATE_FORMAT.parse(m5BarTime);
-			
+
 			EurUsdM5Candle eurUsdM5Candle = getEurUsdM5Candle(m5BarDate);
 			eurUsdM5Candle.setTime(m5BarDate);
 			eurUsdM5Candle.setLow(m5BarLow);
@@ -77,16 +79,43 @@ public class TickServiceController {
 			eurUsdM5Candle.setVolume(m5BarVolume);
 			candleService.save(eurUsdM5Candle);
 		}
-		
+
 		return "200";
 	}
 
 	private EurUsdM5Candle getEurUsdM5Candle(Date m5BarTime) throws ParseException {
-		
+
 		EurUsdM5Candle eurUsdM5Candle = candleService.findByTime(m5BarTime, EurUsdM5Candle.class);
 		if (eurUsdM5Candle == null) {
 			eurUsdM5Candle = new EurUsdM5Candle();
 		}
 		return eurUsdM5Candle;
+	}
+
+	private EurUsdM15Candle getEurUsdM15Candle(Date m15BarTime) throws ParseException {
+
+		EurUsdM15Candle eurUsdM15Candle = candleService.findByTime(m15BarTime, EurUsdM15Candle.class);
+		if (eurUsdM15Candle == null) {
+			eurUsdM15Candle = new EurUsdM15Candle();
+		}
+		return eurUsdM15Candle;
+	}
+
+	private EurUsdM30Candle getEurUsdM30Candle(Date m30BarTime) throws ParseException {
+
+		EurUsdM30Candle eurUsdM30Candle = candleService.findByTime(m30BarTime, EurUsdM30Candle.class);
+		if (eurUsdM30Candle == null) {
+			eurUsdM30Candle = new EurUsdM30Candle();
+		}
+		return eurUsdM30Candle;
+	}
+
+	private EurUsdH1Candle getEurUsdMH1Candle(Date m15BarTime) throws ParseException {
+
+		EurUsdH1Candle eurUsdH1Candle = candleService.findByTime(m15BarTime, EurUsdH1Candle.class);
+		if (eurUsdH1Candle == null) {
+			eurUsdH1Candle = new EurUsdH1Candle();
+		}
+		return eurUsdH1Candle;
 	}
 }

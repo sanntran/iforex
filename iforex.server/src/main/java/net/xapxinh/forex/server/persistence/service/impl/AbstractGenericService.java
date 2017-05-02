@@ -15,6 +15,7 @@ public abstract class AbstractGenericService<T extends Serializable> implements 
 	public T save(T entity) {
 		return getDao().save(entity);
 	}
+	
 	@Override
 	public T insert(final T entity) {
 		return getDao().insert(entity);

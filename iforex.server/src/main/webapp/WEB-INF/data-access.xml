@@ -28,4 +28,12 @@
      <bean id="candleService" class="net.xapxinh.forex.server.persistence.service.impl.CandleServiceImpl">
       <constructor-arg ref="candleDao" />    
     </bean>
+    
+    <bean id="waveDao" class="net.xapxinh.forex.server.persistence.dao.impl.WaveDaoImpl">
+      <constructor-arg ref="sessionFactory" />    
+    </bean>
+    
+     <bean id="waveService" class="net.xapxinh.forex.server.persistence.service.impl.WaveServiceImpl">
+      <constructor-arg ref="waveDao" />    
+    </bean>
 </beans>

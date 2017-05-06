@@ -15,7 +15,15 @@
 			<column name="name" />
 		</property>
 		
-		
+		<bag name="candles" table="eur_usd_m30_waves_candles"
+        	inverse="false" lazy="true" fetch="select" order-by="candle_id">
+            <key>
+                <column name="wave_id" not-null="true" />
+            </key>
+            <many-to-many entity-name="net.xapxinh.forex.server.entity.candle.EurUsdM30Candle">
+                <column name="candle_id" not-null="true" />
+            </many-to-many>
+		</bag>
 	</class>
 	
 </hibernate-mapping>

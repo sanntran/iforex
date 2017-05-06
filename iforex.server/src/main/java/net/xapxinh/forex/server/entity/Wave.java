@@ -1,5 +1,6 @@
 package net.xapxinh.forex.server.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Wave extends Pojo {
@@ -14,5 +15,12 @@ public abstract class Wave extends Pojo {
 
 	public void setCandles(List<Candle> candles) {
 		this.candles = candles;
+	}
+	
+	public synchronized void addCandle(Candle candle) {
+		if (candles == null) {
+			candles = new ArrayList<>();
+		}
+		candles.add(candle);
 	}
 }

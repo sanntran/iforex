@@ -38,6 +38,20 @@
 		<property name="volume">
 			<column name="volume" />
 		</property>
+		
+		<property name="volbuy">
+			<column name="volbuy" />
+		</property>
+		
+		<bag name="waves" table="eur_usd_m5_waves_candles"
+        	inverse="false" lazy="true" fetch="select" order-by="wave_id">
+            <key>
+                <column name="candle_id" not-null="true" />
+            </key>
+            <many-to-many entity-name="net.xapxinh.forex.server.entity.wave.EurUsdM5Wave">
+                <column name="wave_id" not-null="true" />
+            </many-to-many>
+		</bag>
         
 	</class>
 	

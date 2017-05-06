@@ -6,7 +6,10 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,20 @@ public class WaveDaoImpl extends AbstractGenericDao<Wave> implements IWaveDao {
 	@Override
 	public List<Wave> loadAll() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public <T extends Wave> T findLast(Class<T> clazz) {
+		DetachedCriteria maxId = DetachedCriteria.forClass(clazz)
+			    .setProjection(Projections.max("id") );
+		final Criteria criteria = getCurrentSession().createCriteria(clazz)
+				   .add(Property.forName("id").eq(maxId));
+		@SuppressWarnings("unchecked")
+		List<T> results = criteria.list();
+		if (results == null || results.isEmpty()) {
+			return null;
+		}
+		return results.get(0);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -48,4 +65,5 @@ public class WaveDaoImpl extends AbstractGenericDao<Wave> implements IWaveDao {
 
 		return criteria.list();
 	}
+
 }

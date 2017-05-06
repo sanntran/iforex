@@ -1,6 +1,8 @@
 package net.xapxinh.forex.server.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Candle extends Pojo {
 	
@@ -55,6 +57,8 @@ public class Candle extends Pojo {
 	private double open;
 	private double close;
 	private long volume;
+	private long volbuy;
+	private List<Wave> waves;
 	
 	public Date getTime() {
 		return time;
@@ -131,5 +135,30 @@ public class Candle extends Pojo {
 		else {
 			return open - close;
 		}
+	}
+
+	public long getVolsell() {
+		return volume - volbuy;
+	}
+	
+	public long getVolbuy() {
+		return volbuy;
+	}
+	public void setVolbuy(long volbuy) {
+		this.volbuy = volbuy;
+	}
+	
+	public List<Wave> getWaves() {
+		return waves;
+	}
+	public void setWaves(List<Wave> waves) {
+		this.waves = waves;
+	}
+	
+	public synchronized void addWave(Wave wave) {
+		if (waves == null) {
+			waves = new ArrayList<>();
+		}
+		waves.add(wave);
 	}
 }

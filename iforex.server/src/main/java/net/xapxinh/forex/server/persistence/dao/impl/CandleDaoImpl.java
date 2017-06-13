@@ -25,6 +25,12 @@ public class CandleDaoImpl extends AbstractGenericDao<Candle> implements ICandle
 	public List<Candle> loadAll() {
 		return Collections.emptyList();
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Candle> List<T> loadAll(Class<T> clazz) {
+		return getCurrentSession().createQuery("from " + clazz.getName()).list();
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -48,4 +54,5 @@ public class CandleDaoImpl extends AbstractGenericDao<Candle> implements ICandle
 
 		return criteria.list();
 	}
+
 }

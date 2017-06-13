@@ -40,6 +40,11 @@ public class CandleServiceImpl extends AbstractGenericService<Candle> implements
 	protected ICandleDao getDao() {
 		return candleDao;
 	}
+	
+	@Override
+	public <T extends Candle> List<T> loadAll(Class<T> clazz) {
+		return getDao().loadAll(clazz);
+	}
 
 	@Override
 	public <T extends Candle> T findByTime(Date date, Class<T> clazz) {

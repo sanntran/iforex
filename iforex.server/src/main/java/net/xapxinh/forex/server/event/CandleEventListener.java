@@ -1,5 +1,7 @@
 package net.xapxinh.forex.server.event;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -11,6 +13,7 @@ import net.xapxinh.forex.server.entity.candle.EurUsdM5Candle;
 import net.xapxinh.forex.server.entity.wave.EurUsdM5Wave;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
 import net.xapxinh.forex.server.persistence.service.IWaveService;
+import net.xapxinh.forex.server.statistic.EurUsdStatistic;
 
 public class CandleEventListener implements Observer {
 
@@ -25,7 +28,7 @@ public class CandleEventListener implements Observer {
 		if (arg instanceof CandleInsertedEvent) {
 			Candle candle = ((CandleInsertedEvent) arg).getCandle();
 			if (candle instanceof EurUsdM5Candle) {
-				addCandleToLastM5Wave(candle);
+				//addCandleToLastM5Wave(candle);
 			}
 		}
 	}
@@ -48,9 +51,38 @@ public class CandleEventListener implements Observer {
 	}
 
 	private void separateWave(Wave wave) {
-		if (wave.getCandles() == null || wave.getCandles().size() < 8) {
+		if (wave.getCandles() == null || wave.getCandles().size() < Wave.MIN_SIZE * 2) {
+			return;
+		}
+		if (wave.isEnd()) { // 
 			return;
 		}
 		
+		List<Candle> candles = new ArrayList<>();
+		
+		
+		for (int i = Wave.MIN_SIZE; i > 0; i--) {
+			candles.add(wave.getCandles().get(wave.getCandles().size() - i));
+		}
+		if (isNewWave(candles, wave)) {
+			Wave newWave = wave.newInstance();
+		}
+	}
+
+	private boolean isNewWave(List<Candle> candles, Wave wave) {
+		if (wave.isDown()) {
+			
+		}
+		
+		
+		int size = candles.size();
+		for (int i = 1; i < size; i++) {
+			///////////////
+		}
+		return false;
+	}
+	
+	private double getMinM5WaveHeigh() {
+		return (EurUsdStatistic.getEuUsSessionEurUsdM15AvgHeigh() / 2) * 0.9;
 	}
 }

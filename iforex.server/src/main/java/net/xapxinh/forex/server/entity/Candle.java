@@ -1,6 +1,7 @@
 package net.xapxinh.forex.server.entity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class Candle extends Pojo {
 	private double close;
 	private long volume;
 	private long volbuy;
+	private Calendar calendar;
 	private List<Wave> waves;
 	
 	public Date getTime() {
@@ -160,5 +162,26 @@ public class Candle extends Pojo {
 			waves = new ArrayList<>();
 		}
 		waves.add(wave);
+	}
+	
+	public double getHeigh() {
+		return high - low;
+	}
+	
+	public Calendar getCalendar() {
+		if (time == null) {
+			calendar = null;
+			return null;
+		}
+		if (calendar == null) {
+			calendar = Calendar.getInstance();
+			calendar.setTime(time);
+		}
+		return calendar;
+	}
+	
+	public boolean isInEuUsSession() {
+		int hour = getCalendar().get(Calendar.HOUR_OF_DAY);
+		return hour >= 9 || hour < 2;
 	}
 }

@@ -49,24 +49,20 @@ public abstract class Wave extends Pojo {
 		return highestCandle.getTime().before(lowestCandle.getTime()) && highestCandle.equals(firstCandle);
 	}
 	
-	public boolean isEnd() {
+	public boolean hasDirection() {
+		return isUp() || isDown();
+	}
+	
+	public boolean isHesitant() {
 		Candle lowestCandle = getLowestCandle();
 		Candle highestCandle = getHighestCandle();
 		Candle firstCandle = getFirstCandle();
 		if (lowestCandle == null || highestCandle == null || firstCandle == null) {
 			return false;
 		}
-		if (lowestCandle.getTime().before(highestCandle.getTime()) && lowestCandle.equals(firstCandle)) {
-			return false; // isUp
-		}
-		else {
-			
-		}
-		if (getHighestCandle().getTime().before(getLowestCandle().getTime()) && highestCandle.getTime().equals(firstCandle)) {
-			return false; // isDown
-		}
-		
+		return lowestCandle.equals(highestCandle) && lowestCandle.equals(firstCandle);
 	}
+	
 	
 	public Candle getHighestCandle() {
 		Candle highestCandle = getCandles().get(0);

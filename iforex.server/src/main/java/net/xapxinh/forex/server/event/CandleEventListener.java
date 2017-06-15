@@ -9,11 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import net.xapxinh.forex.server.entity.Candle;
 import net.xapxinh.forex.server.entity.Wave;
-import net.xapxinh.forex.server.entity.candle.EurUsdM5Candle;
-import net.xapxinh.forex.server.entity.wave.EurUsdM5Wave;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
 import net.xapxinh.forex.server.persistence.service.IWaveService;
-import net.xapxinh.forex.server.statistic.EurUsdStatistic;
 
 public class CandleEventListener implements Observer {
 
@@ -27,27 +24,25 @@ public class CandleEventListener implements Observer {
 	public void update(Observable o, Object arg) {
 		if (arg instanceof CandleInsertedEvent) {
 			Candle candle = ((CandleInsertedEvent) arg).getCandle();
-			if (candle instanceof EurUsdM5Candle) {
-				//addCandleToLastM5Wave(candle);
-			}
+			addCandleToLastWave(candle);
 		}
 	}
 
-	private void addCandleToLastM5Wave(Candle candle) {
-		EurUsdM5Candle m5Candle = (EurUsdM5Candle)candle;
-		EurUsdM5Wave m5Wave = waveService.findLast(EurUsdM5Wave.class);	
+	private void addCandleToLastWave(Candle candle) {
 		
-		if (m5Wave == null) {
-			m5Wave = new EurUsdM5Wave();
-			waveService.insert(m5Wave);
+		Wave wave = waveService.findLast(candle.getWaveClass());	
+		
+		if (wave == null) {
+			wave = candle.newWave();
+			waveService.insert(wave);
 		}
 		
-		m5Wave.addCandle(m5Candle);
-		m5Candle.addWave(m5Wave);
-		waveService.update(m5Wave);
-		candleService.update(m5Candle);
+		wave.addCandle(candle);
+		candle.addWave(wave);
+		waveService.update(wave);
+		candleService.update(candle);
 		
-		separateWave(m5Wave);
+		separateWave(wave);
 	}
 
 	private void separateWave(Wave wave) {
@@ -62,52 +57,83 @@ public class CandleEventListener implements Observer {
 		
 		//
 		if (wave.isUp()) {
-			// find the highest bottom
-			Candle highestLowPriceCandle = candles.get(0);
-			int highestLowPriceCandleIdx = 0;
+			// find the highest candle
+			Candle highestPriceCandle = wave.getFirstCandle();
+			int highestPriceCandleIdx = 0;
 			for (int i = 1; i < candles.size(); i++) {
-				if (highestLowPriceCandle.getLow() < candles.get(i).getLow()) {
-					highestLowPriceCandle = candles.get(i);
-					highestLowPriceCandleIdx = i;
+				if (highestPriceCandle.getHigh() < wave.getCandles().get(i).getHigh()) {
+					highestPriceCandle = candles.get(i);
+					highestPriceCandleIdx = i;
 				}
 			}
-			if ((candles.size() - highestLowPriceCandleIdx) < Wave.MIN_SIZE) {
+			if ((candles.size() - highestPriceCandleIdx) < Wave.MIN_SIZE) {
+				return;
+			}			
+			if (wave.getLastCandle().getLow() >= highestPriceCandle.getLow()) {
 				return;
 			}
-			for (int i = highestLowPriceCandleIdx; i < candles.size(); i++) {
-				candles.add(candles.get(i));
+			if ((highestPriceCandle.getHigh() - wave.getLastCandle().getLow()) <= wave.getMinHeigh()) {
+				return;
+			}			
+			for (int i = highestPriceCandleIdx; i < wave.getCandles().size(); i++) {
+				candles.add(wave.getCandles().get(i));
 			}
-			for (int i = highestLowPriceCandleIdx; i < candles.size();) {
-				candles.remove(i);
+			for (int i = highestPriceCandleIdx + 1; i < wave.getCandles().size();) {
+				Candle candle = wave.getCandles().get(i);
+				candle.removeWave(wave);
+				wave.getCandles().remove(i);
+				candleService.update(candle);
+				waveService.update(wave);
+			}
+			
+			Wave newWave = wave.newInstance();
+			newWave.setCandles(candles);
+			waveService.insert(newWave);
+			for (Candle candle : candles) {
+				candle.addWave(newWave);
+				candleService.update(candle);
 			}
 		}
 		else if (wave.isDown()) {
+			// find the lowest candle
+			Candle lowestPriceCandle = wave.getFirstCandle();
+			int lowestPriceCandleIdx = 0;
+			for (int i = 1; i < candles.size(); i++) {
+				if (lowestPriceCandle.getLow() > wave.getCandles().get(i).getLow()) {
+					lowestPriceCandle = candles.get(i);
+					lowestPriceCandleIdx = i;
+				}
+			}
+			if ((candles.size() - lowestPriceCandleIdx) < Wave.MIN_SIZE) {
+				return;
+			}			
+			if (wave.getLastCandle().getHigh() <= lowestPriceCandle.getHigh()) {
+				return;
+			}
+			if ((wave.getLastCandle().getHigh() - lowestPriceCandle.getLow()) <= wave.getMinHeigh()) {
+				return;
+			}
+			for (int i = lowestPriceCandleIdx; i < wave.getCandles().size(); i++) {
+				candles.add(wave.getCandles().get(i));
+			}
+			for (int i = lowestPriceCandleIdx + 1; i < wave.getCandles().size();) {
+				Candle candle = wave.getCandles().get(i);
+				candle.removeWave(wave);
+				wave.getCandles().remove(i);
+				candleService.update(candle);
+				waveService.update(wave);
+			}
 			
+			Wave newWave = wave.newInstance();
+			newWave.setCandles(candles);
+			waveService.insert(newWave);
+			for (Candle candle : candles) {
+				candle.addWave(newWave);
+				candleService.update(candle);
+			}
 		}
 		else {
 			// does nothing
 		}
-		
-		
-		if (isNewWave(candles, wave)) {
-			Wave newWave = wave.newInstance();
-		}
-	}
-
-	private boolean isNewWave(List<Candle> candles, Wave wave) {
-		if (wave.isDown()) {
-			
-		}
-		
-		
-		int size = candles.size();
-		for (int i = 1; i < size; i++) {
-			///////////////
-		}
-		return false;
-	}
-	
-	private double getMinM5WaveHeigh() {
-		return (EurUsdStatistic.getEuUsSessionEurUsdM15AvgHeigh() / 2) * 0.9;
-	}
+	}	
 }

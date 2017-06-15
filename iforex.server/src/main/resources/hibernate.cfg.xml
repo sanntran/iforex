@@ -40,19 +40,19 @@
 	   	<property name="hibernate.c3p0.timeout">1800</property>
 		
 		<!-- Mapping files -->
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM5Candle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM15Candle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdM30Candle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdH1Candle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdH4Candle.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/candle/EurUsdD1Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/M5Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/M15Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/M30Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/H1Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/H4Candle.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/candle/D1Candle.hbm.xml"/>
 		
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM5Wave.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM15Wave.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdM30Wave.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH1Wave.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdH4Wave.hbm.xml"/>
-		<mapping resource="net/xapxinh/forex/server/entity/wave/EurUsdD1Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/M5Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/M15Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/M30Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/H1Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/H4Wave.hbm.xml"/>
+		<mapping resource="net/xapxinh/forex/server/entity/wave/D1Wave.hbm.xml"/>
 		
 	</session-factory>
 </hibernate-configuration>

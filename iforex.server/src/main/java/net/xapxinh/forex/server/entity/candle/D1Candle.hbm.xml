@@ -5,7 +5,7 @@
 
 <hibernate-mapping>
     
-	<class name="net.xapxinh.forex.server.entity.candle.EurUsdH1Candle" table="eur_usd_h1_candles">
+	<class name="net.xapxinh.forex.server.entity.candle.D1Candle" table="d1_candles">
 		
 		<id name="id" type="long" column="id">
 			<generator class="native" />
@@ -43,12 +43,12 @@
 			<column name="volbuy" />
 		</property>
 		
-		<bag name="waves" table="eur_usd_h1_waves_candles"
+		<bag name="waves" table="d1_waves_candles"
         	inverse="false" lazy="true" fetch="select" order-by="wave_id">
             <key>
                 <column name="candle_id" not-null="true" />
             </key>
-            <many-to-many entity-name="net.xapxinh.forex.server.entity.wave.EurUsdH1Wave">
+            <many-to-many entity-name="net.xapxinh.forex.server.entity.wave.D1Wave">
                 <column name="wave_id" not-null="true" />
             </many-to-many>
 		</bag>

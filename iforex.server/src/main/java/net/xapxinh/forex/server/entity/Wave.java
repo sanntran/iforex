@@ -105,4 +105,19 @@ public abstract class Wave extends Pojo {
 		}
 		return candles.get(0);
 	}
+
+	public Candle getLastCandle() {
+		if (candles == null || candles.isEmpty()) {
+			return null;
+		}
+		return candles.get(candles.size() - 1);
+	}
+
+	public int getPeriod() {
+		return 0;
+	}
+
+	public double getMinHeigh() {
+		return 0;
+	}
 }

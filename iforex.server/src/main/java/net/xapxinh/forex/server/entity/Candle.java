@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class Candle extends Pojo {
+public abstract class Candle extends Pojo {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -184,4 +184,24 @@ public class Candle extends Pojo {
 		int hour = getCalendar().get(Calendar.HOUR_OF_DAY);
 		return hour >= 9 || hour < 2;
 	}
+	
+	public int getPeriod() {
+		return 0;
+	}
+	
+	public void removeWave(Wave wave) {
+		if (waves == null || waves.isEmpty()) {
+			return;
+		}
+		for (Wave w : waves) {
+			if (w.getId() == wave.getId()) {
+				waves.remove(w);
+				break;
+			}
+		}
+	}
+
+	public abstract Wave newWave();
+	
+	public abstract Class<? extends Wave> getWaveClass();
 }

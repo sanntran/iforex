@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import net.xapxinh.forex.server.entity.Candle;
-import net.xapxinh.forex.server.entity.Symbol;
-import net.xapxinh.forex.server.entity.candle.EurUsdD1Candle;
-import net.xapxinh.forex.server.entity.candle.EurUsdH1Candle;
-import net.xapxinh.forex.server.entity.candle.EurUsdM15Candle;
-import net.xapxinh.forex.server.entity.candle.EurUsdM30Candle;
-import net.xapxinh.forex.server.entity.candle.EurUsdM5Candle;
+import net.xapxinh.forex.server.entity.candle.D1Candle;
+import net.xapxinh.forex.server.entity.candle.H1Candle;
+import net.xapxinh.forex.server.entity.candle.M15Candle;
+import net.xapxinh.forex.server.entity.candle.M30Candle;
+import net.xapxinh.forex.server.entity.candle.M5Candle;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
 
 @RestController
@@ -73,64 +72,62 @@ public class TickServiceController {
 				+ m5BarTime + " m5BarOpen: " + m5BarOpen + " m5BarHigh: " + m5BarHigh + " m5BarLow: " + m5BarLow
 				+ " m5BarClose: " + m5BarClose + " m5BarVolume: " + m5BarVolume);
 		
-		if (Symbol.EURUSD.equals(symbol)) {
-			saveEurUsdM5Candle(m5BarTime, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume);
-			saveEurUsdM15Candle(m15BarTime, m15BarOpen, m15BarHigh, m15BarLow, m15BarClose, m15BarVolume);
-			saveEurUsdM30Candle(m30BarTime, m30BarOpen, m30BarHigh, m30BarLow, m30BarClose, m30BarVolume);
-			saveEurUsdH1Candle(h1BarTime, h1BarOpen, h1BarHigh, h1BarLow, h1BarClose, h1BarVolume);
-			saveEurUsdH4Candle(h4BarTime, h4BarOpen, h4BarHigh, h4BarLow, h4BarClose, h4BarVolume);
-			saveEurUsdD1Candle(d1BarTime, d1BarOpen, d1BarHigh, d1BarLow, d1BarClose, d1BarVolume);
-		}
+		saveM5Candle(m5BarTime, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume);
+		saveM15Candle(m15BarTime, m15BarOpen, m15BarHigh, m15BarLow, m15BarClose, m15BarVolume);
+		saveM30Candle(m30BarTime, m30BarOpen, m30BarHigh, m30BarLow, m30BarClose, m30BarVolume);
+		saveH1Candle(h1BarTime, h1BarOpen, h1BarHigh, h1BarLow, h1BarClose, h1BarVolume);
+		saveH4Candle(h4BarTime, h4BarOpen, h4BarHigh, h4BarLow, h4BarClose, h4BarVolume);
+		saveD1Candle(d1BarTime, d1BarOpen, d1BarHigh, d1BarLow, d1BarClose, d1BarVolume);
 
 		return "200";
 	}
 	
-	private void saveEurUsdD1Candle(String d1BarTime, double d1BarOpen, double d1BarHigh, double d1BarLow,
+	private void saveD1Candle(String d1BarTime, double d1BarOpen, double d1BarHigh, double d1BarLow,
 			double d1BarClose, long d1BarVolume) throws ParseException {
 		Date d1BarDate = MT4_DATE_FORMAT.parse(d1BarTime);
-		EurUsdD1Candle eurUsdD1Candle = getEurUsdD1Candle(d1BarDate);
-		updateCandle(eurUsdD1Candle, d1BarOpen, d1BarHigh, d1BarLow, d1BarClose, d1BarVolume, d1BarDate);
-		candleService.save(eurUsdD1Candle);
+		D1Candle d1Candle = getD1Candle(d1BarDate);
+		updateCandle(d1Candle, d1BarOpen, d1BarHigh, d1BarLow, d1BarClose, d1BarVolume, d1BarDate);
+		candleService.save(d1Candle);
 	}
 	
-	private void saveEurUsdH4Candle(String h4BarTime, double h4BarOpen, double h4BarHigh, double h4BarLow,
+	private void saveH4Candle(String h4BarTime, double h4BarOpen, double h4BarHigh, double h4BarLow,
 			double h4BarClose, long h4BarVolume) throws ParseException {
 		Date h4BarDate = MT4_DATE_FORMAT.parse(h4BarTime);
-		EurUsdD1Candle eurUsdH4Candle = getEurUsdH4Candle(h4BarDate);
-		updateCandle(eurUsdH4Candle, h4BarOpen, h4BarHigh, h4BarLow, h4BarClose, h4BarVolume, h4BarDate);
-		candleService.save(eurUsdH4Candle);
+		D1Candle h4Candle = getH4Candle(h4BarDate);
+		updateCandle(h4Candle, h4BarOpen, h4BarHigh, h4BarLow, h4BarClose, h4BarVolume, h4BarDate);
+		candleService.save(h4Candle);
 	}
 
-	private void saveEurUsdH1Candle(String h1BarTime, double h1BarOpen, double h1BarHigh, double h1BarLow,
+	private void saveH1Candle(String h1BarTime, double h1BarOpen, double h1BarHigh, double h1BarLow,
 			double h1BarClose, long h1BarVolume) throws ParseException {
 		Date h1BarDate = MT4_DATE_FORMAT.parse(h1BarTime);
-		EurUsdH1Candle eurUsdH1Candle = getEurUsdH1Candle(h1BarDate);
-		updateCandle(eurUsdH1Candle, h1BarOpen, h1BarHigh, h1BarLow, h1BarClose, h1BarVolume, h1BarDate);
-		candleService.save(eurUsdH1Candle);
+		H1Candle h1Candle = getH1Candle(h1BarDate);
+		updateCandle(h1Candle, h1BarOpen, h1BarHigh, h1BarLow, h1BarClose, h1BarVolume, h1BarDate);
+		candleService.save(h1Candle);
 	}
 
-	private void saveEurUsdM30Candle(String m30BarTime, double m30BarOpen, double m30BarHigh, double m30BarLow,
+	private void saveM30Candle(String m30BarTime, double m30BarOpen, double m30BarHigh, double m30BarLow,
 			double m30BarClose, long m30BarVolume) throws ParseException {
 		Date m30BarDate = MT4_DATE_FORMAT.parse(m30BarTime);
-		EurUsdM30Candle eurUsdM30Candle = getEurUsdM30Candle(m30BarDate);
-		updateCandle(eurUsdM30Candle, m30BarOpen, m30BarHigh, m30BarLow, m30BarClose, m30BarVolume, m30BarDate);
-		candleService.save(eurUsdM30Candle);
+		M30Candle m30Candle = getM30Candle(m30BarDate);
+		updateCandle(m30Candle, m30BarOpen, m30BarHigh, m30BarLow, m30BarClose, m30BarVolume, m30BarDate);
+		candleService.save(m30Candle);
 	}
 
-	private void saveEurUsdM15Candle(String m15BarTime, double m15BarOpen, double m15BarHigh, double m15BarLow,
+	private void saveM15Candle(String m15BarTime, double m15BarOpen, double m15BarHigh, double m15BarLow,
 			double m15BarClose, long m15BarVolume) throws ParseException {
 		Date m15BarDate = MT4_DATE_FORMAT.parse(m15BarTime);
-		EurUsdM15Candle eurUsdM15Candle = getEurUsdM15Candle(m15BarDate);
-		updateCandle(eurUsdM15Candle, m15BarOpen, m15BarHigh, m15BarLow, m15BarClose, m15BarVolume, m15BarDate);
-		candleService.save(eurUsdM15Candle);
+		M15Candle m15Candle = getM15Candle(m15BarDate);
+		updateCandle(m15Candle, m15BarOpen, m15BarHigh, m15BarLow, m15BarClose, m15BarVolume, m15BarDate);
+		candleService.save(m15Candle);
 	}
 	
-	private void saveEurUsdM5Candle(String m5BarTime, double m5BarOpen, double m5BarHigh, double m5BarLow,
+	private void saveM5Candle(String m5BarTime, double m5BarOpen, double m5BarHigh, double m5BarLow,
 			double m5BarClose, long m5BarVolume) throws ParseException {
 		Date m5BarDate = MT4_DATE_FORMAT.parse(m5BarTime);
-		EurUsdM5Candle eurUsdM5Candle = getEurUsdM5Candle(m5BarDate);
-		updateCandle(eurUsdM5Candle, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume, m5BarDate);
-		candleService.save(eurUsdM5Candle);
+		M5Candle m5Candle = getM5Candle(m5BarDate);
+		updateCandle(m5Candle, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume, m5BarDate);
+		candleService.save(m5Candle);
 	}
 	
 	private void updateCandle(Candle candle, double open, double high, double low, double close,
@@ -147,53 +144,52 @@ public class TickServiceController {
 		candle.setVolume(volume);
 	}
 	
-	private EurUsdD1Candle getEurUsdD1Candle(Date d1BarTime) throws ParseException {
-		EurUsdD1Candle eurUsdD1Candle = candleService.findByTime(d1BarTime, EurUsdD1Candle.class);
-		if (eurUsdD1Candle == null) {
-			eurUsdD1Candle = new EurUsdD1Candle();
+	private D1Candle getD1Candle(Date d1BarTime) throws ParseException {
+		D1Candle d1Candle = candleService.findByTime(d1BarTime, D1Candle.class);
+		if (d1Candle == null) {
+			d1Candle = new D1Candle();
 		}
-		return eurUsdD1Candle;
+		return d1Candle;
 	}
 
-	private EurUsdD1Candle getEurUsdH4Candle(Date h4BarTime) throws ParseException {
-		EurUsdD1Candle eurUsdH4Candle = candleService.findByTime(h4BarTime, EurUsdD1Candle.class);
-		if (eurUsdH4Candle == null) {
-			eurUsdH4Candle = new EurUsdD1Candle();
+	private D1Candle getH4Candle(Date h4BarTime) throws ParseException {
+		D1Candle h4Candle = candleService.findByTime(h4BarTime, D1Candle.class);
+		if (h4Candle == null) {
+			h4Candle = new D1Candle();
 		}
-		return eurUsdH4Candle;
+		return h4Candle;
 	}
 
-	private EurUsdH1Candle getEurUsdH1Candle(Date h1BarTime) throws ParseException {
-		EurUsdH1Candle eurUsdH1Candle = candleService.findByTime(h1BarTime, EurUsdH1Candle.class);
-		if (eurUsdH1Candle == null) {
-			eurUsdH1Candle = new EurUsdH1Candle();
+	private H1Candle getH1Candle(Date h1BarTime) throws ParseException {
+		H1Candle h1Candle = candleService.findByTime(h1BarTime, H1Candle.class);
+		if (h1Candle == null) {
+			h1Candle = new H1Candle();
 		}
-		return eurUsdH1Candle;
+		return h1Candle;
 	}
 
-	private EurUsdM30Candle getEurUsdM30Candle(Date m30BarTime) throws ParseException {
-		EurUsdM30Candle eurUsdM30Candle = candleService.findByTime(m30BarTime, EurUsdM30Candle.class);
-		if (eurUsdM30Candle == null) {
-			eurUsdM30Candle = new EurUsdM30Candle();
+	private M30Candle getM30Candle(Date m30BarTime) throws ParseException {
+		M30Candle m30Candle = candleService.findByTime(m30BarTime, M30Candle.class);
+		if (m30Candle == null) {
+			m30Candle = new M30Candle();
 		}
-		return eurUsdM30Candle;
+		return m30Candle;
 	}
 
-	private EurUsdM15Candle getEurUsdM15Candle(Date m15BarTime) throws ParseException {
-		EurUsdM15Candle eurUsdM15Candle = candleService.findByTime(m15BarTime, EurUsdM15Candle.class);
-		if (eurUsdM15Candle == null) {
-			eurUsdM15Candle = new EurUsdM15Candle();
+	private M15Candle getM15Candle(Date m15BarTime) throws ParseException {
+		M15Candle m15Candle = candleService.findByTime(m15BarTime, M15Candle.class);
+		if (m15Candle == null) {
+			m15Candle = new M15Candle();
 		}
-		return eurUsdM15Candle;
+		return m15Candle;
 	}
 	
-	private EurUsdM5Candle getEurUsdM5Candle(Date m5BarTime) throws ParseException {
-
-		EurUsdM5Candle eurUsdM5Candle = candleService.findByTime(m5BarTime, EurUsdM5Candle.class);
-		if (eurUsdM5Candle == null) {
-			eurUsdM5Candle = new EurUsdM5Candle();
+	private M5Candle getM5Candle(Date m5BarTime) throws ParseException {
+		M5Candle m5Candle = candleService.findByTime(m5BarTime, M5Candle.class);
+		if (m5Candle == null) {
+			m5Candle = new M5Candle();
 		}
-		return eurUsdM5Candle;
+		return m5Candle;
 	}
 	
 }

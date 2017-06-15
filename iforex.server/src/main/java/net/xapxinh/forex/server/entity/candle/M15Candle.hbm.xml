@@ -5,16 +5,12 @@
 
 <hibernate-mapping>
     
-	<class name="net.xapxinh.forex.server.entity.candle.EurUsdM30Candle" table="eur_usd_m30_candles">
+	<class name="net.xapxinh.forex.server.entity.candle.M15Candle" table="m15_candles">
 		
 		<id name="id" type="long" column="id">
 			<generator class="native" />
 		</id>
-		
-		<property name="name">
-			<column name="name" />
-		</property>
-		
+        
         <property name="time">
 			<column name="time" sql-type="datetime"/>
 		</property>
@@ -43,12 +39,12 @@
 			<column name="volbuy" />
 		</property>
 		
-		<bag name="waves" table="eur_usd_m30_waves_candles"
+		<bag name="waves" table="m15_waves_candles"
         	inverse="false" lazy="true" fetch="select" order-by="wave_id">
             <key>
                 <column name="candle_id" not-null="true" />
             </key>
-            <many-to-many entity-name="net.xapxinh.forex.server.entity.wave.EurUsdM30Wave">
+            <many-to-many entity-name="net.xapxinh.forex.server.entity.wave.M15Wave">
                 <column name="wave_id" not-null="true" />
             </many-to-many>
 		</bag>

@@ -1,0 +1,6 @@
+[
+{"city":"NewYork", "open":12, "close":21, "start": "MONDAY", "summer": {"start":"March 12", "end":"November 5"}},
+{"city":"London", "open":7, "close":16, "start": "MONDAY", "summer": {"start":"March 26", "end":"October 29"}},
+{"city":"Tokyo", "open":0, "close":9, "start": "MONDAY", "summer": {"start":"March 26", "end":"October 29"}},
+{"city":"Sydney", "open":21, "close":6, "start": "SUNDAY", "summer": {"start":"April 2", "end":"October 1"}}
+]

@@ -1,4 +1,4 @@
-package net.xapxinh.forex.server.webapi;
+package net.xapxinh.forex.server.api;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,12 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import net.xapxinh.forex.server.entity.Candle;
+import net.xapxinh.forex.server.entity.Decision;
 import net.xapxinh.forex.server.entity.candle.D1Candle;
 import net.xapxinh.forex.server.entity.candle.H1Candle;
 import net.xapxinh.forex.server.entity.candle.M15Candle;
+import net.xapxinh.forex.server.entity.candle.M1Candle;
 import net.xapxinh.forex.server.entity.candle.M30Candle;
 import net.xapxinh.forex.server.entity.candle.M5Candle;
 import net.xapxinh.forex.server.persistence.service.ICandleService;
+import net.xapxinh.forex.server.strategy.IStrategist;
 
 @RestController
 @EnableWebMvc
@@ -32,6 +35,9 @@ public class TickServiceController {
 
 	@Autowired
 	private ICandleService candleService;
+	
+	@Autowired
+	private IStrategist strategist;	
 
 	@RequestMapping(value = "/ticks", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
 	@ResponseBody
@@ -41,6 +47,10 @@ public class TickServiceController {
 			@RequestParam(name = "tickask", required = false) double tickAsk,
 			@RequestParam(name = "ticklast", required = false) double tickLast,
 			@RequestParam(name = "error", required = false) String error,
+			
+			@RequestParam("m1BarTime") String m1BarTime, @RequestParam("m1BarOpen") double m1BarOpen,
+			@RequestParam("m1BarHigh") double m1BarHigh, @RequestParam("m1BarLow") double m1BarLow,
+			@RequestParam("m1BarClose") double m1BarClose, @RequestParam("m1BarVolume") long m1BarVolume,
 
 			@RequestParam("m5BarTime") String m5BarTime, @RequestParam("m5BarOpen") double m5BarOpen,
 			@RequestParam("m5BarHigh") double m5BarHigh, @RequestParam("m5BarLow") double m5BarLow,
@@ -72,6 +82,7 @@ public class TickServiceController {
 				+ m5BarTime + " m5BarOpen: " + m5BarOpen + " m5BarHigh: " + m5BarHigh + " m5BarLow: " + m5BarLow
 				+ " m5BarClose: " + m5BarClose + " m5BarVolume: " + m5BarVolume);
 		
+		saveM1Candle(m1BarTime, m1BarOpen, m1BarHigh, m1BarLow, m1BarClose, m1BarVolume);
 		saveM5Candle(m5BarTime, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume);
 		saveM15Candle(m15BarTime, m15BarOpen, m15BarHigh, m15BarLow, m15BarClose, m15BarVolume);
 		saveM30Candle(m30BarTime, m30BarOpen, m30BarHigh, m30BarLow, m30BarClose, m30BarVolume);
@@ -79,9 +90,14 @@ public class TickServiceController {
 		saveH4Candle(h4BarTime, h4BarOpen, h4BarHigh, h4BarLow, h4BarClose, h4BarVolume);
 		saveD1Candle(d1BarTime, d1BarOpen, d1BarHigh, d1BarLow, d1BarClose, d1BarVolume);
 
-		return "200";
+		return toMqlFormat(strategist.makeDecision());
 	}
 	
+	private String toMqlFormat(Decision decision) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private void saveD1Candle(String d1BarTime, double d1BarOpen, double d1BarHigh, double d1BarLow,
 			double d1BarClose, long d1BarVolume) throws ParseException {
 		Date d1BarDate = MT4_DATE_FORMAT.parse(d1BarTime);
@@ -128,6 +144,14 @@ public class TickServiceController {
 		M5Candle m5Candle = getM5Candle(m5BarDate);
 		updateCandle(m5Candle, m5BarOpen, m5BarHigh, m5BarLow, m5BarClose, m5BarVolume, m5BarDate);
 		candleService.save(m5Candle);
+	}
+	
+	private void saveM1Candle(String m1BarTime, double m1BarOpen, double m1BarHigh, double m1BarLow,
+			double m1BarClose, long m1BarVolume) throws ParseException {
+		Date m1BarDate = MT4_DATE_FORMAT.parse(m1BarTime);
+		M1Candle m1Candle = getM1Candle(m1BarDate);
+		updateCandle(m1Candle, m1BarOpen, m1BarHigh, m1BarLow, m1BarClose, m1BarVolume, m1BarDate);
+		candleService.save(m1Candle);
 	}
 	
 	private void updateCandle(Candle candle, double open, double high, double low, double close,
@@ -191,5 +215,12 @@ public class TickServiceController {
 		}
 		return m5Candle;
 	}
-	
+
+	private M1Candle getM1Candle(Date m1BarTime) throws ParseException {
+		M1Candle m1Candle = candleService.findByTime(m1BarTime, M1Candle.class);
+		if (m1Candle == null) {
+			m1Candle = new M1Candle();
+		}
+		return m1Candle;
+	}
 }

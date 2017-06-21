@@ -1,4 +1,4 @@
-package net.xapxinh.forex.server.webapi;
+package net.xapxinh.forex.server.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;

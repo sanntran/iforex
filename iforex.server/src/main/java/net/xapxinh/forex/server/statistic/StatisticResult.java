@@ -1,12 +1,12 @@
 package net.xapxinh.forex.server.statistic;
 
-public class EurUsdStatistic {
+public class StatisticResult {
 	
-	public static double getEuUsSessionEurUsdM15AvgHeigh() {
+	public static double getEuUsSessionM15AvgHeigh() {
 		return 0.00034;
 	}
 	
-	public static double getEuUsSessionEurUsdHighCandlePercent() {
+	public static double getEuUsSessionHighCandlePercent() {
 		return 0.38;
 	}
 	

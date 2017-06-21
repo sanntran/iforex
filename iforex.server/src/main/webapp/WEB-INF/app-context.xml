@@ -18,7 +18,7 @@
 	<import resource="data-access.xml"/>
 	
 	<mvc:annotation-driven/>
-	<context:component-scan base-package="net.xapxinh.forex.server.webapi" />
+	<context:component-scan base-package="net.xapxinh.forex.server.api" />
 	
 	<mvc:interceptors>
 	  <mvc:interceptor>
@@ -34,6 +34,12 @@
 	
 	<bean id="candleEventNotifier" class="net.xapxinh.forex.server.event.CandleEventNotifier" >
 		<constructor-arg ref="candleEventListener" />
+	</bean>
+	
+	<bean id="strategist" class="net.xapxinh.forex.server.strategy.StrategistImpl" >
+	</bean>
+	
+	<bean id="snipperStrategy" class="net.xapxinh.forex.server.strategy.SnipperStrategy" >
 	</bean>
     
 </beans>

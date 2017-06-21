@@ -3,7 +3,7 @@ package net.xapxinh.forex.server.entity;
 public class Decision {
 	
 	public enum NAME {
-		IGNORE, BUY, SELL, CLOSE
+		NO_ORDER, OPEN_ORDER, CLOSE_ORDER
 	}
 	
 	private String name;

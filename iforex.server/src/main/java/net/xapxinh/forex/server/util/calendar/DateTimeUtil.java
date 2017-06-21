@@ -153,4 +153,29 @@ public class DateTimeUtil {
 		String strDate = sdfDate.format(now);
 		return strDate;
 	}
+
+	public static boolean isInEuUsSession() {
+		return false;
+	}
+	
+	public static boolean isInAsianSession() {
+		return false;
+	}
+	
+	public static int getTimeStartEuUsSession() {
+		return 0;
+	}
+	
+	public static int getTimeStartAsianSession() {
+		return 0;
+	}
+	
+	public static int getTimeEndAsianSession() {
+		return 0;
+	}
+	
+
+	public static int getTimeEndEuUsSession() {
+		return 0;
+	}
 }

@@ -1,5 +1,6 @@
 package net.ionoff.forex.ea.controller;
 
+import net.ionoff.forex.ea.service.V300SlopeService;
 import net.ionoff.forex.ea.service.M1CandleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -8,22 +9,35 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 
 @RestController
-@RequestMapping("/candles")
+@RequestMapping("/m1_candles")
 public class M1CandleController {
 
     @Autowired
     M1CandleService m1CandleService;
 
-    @RequestMapping(value = "/m1", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @Autowired
+    V300SlopeService m1CandlePatternMiner;
+
+    @RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
     public String saveM1Candle(@RequestParam("symbol") String symbol,
-                         @RequestParam("m1BarTime") String m1BarTime, @RequestParam("m1BarOpen") double m1BarOpen,
-                         @RequestParam("m1BarHigh") double m1BarHigh, @RequestParam("m1BarLow") double m1BarLow,
-                         @RequestParam("m1BarClose") double m1BarClose, @RequestParam("m1BarVolume") long m1BarVolume,
-                         HttpServletRequest request) throws ParseException {
+                               @RequestParam("barTime") String barTime,
+                               @RequestParam("barOpen") double barOpen,
+                               @RequestParam("barClose") double barClose,
+                               @RequestParam("barHigh") double barHigh,
+                               @RequestParam("barLow") double barLow,
+                               @RequestParam("barVolume") long barVolume,
+                               HttpServletRequest request) throws ParseException {
 
-        m1CandleService.saveM1Candle(symbol, m1BarTime, m1BarOpen, m1BarHigh, m1BarLow, m1BarClose, m1BarVolume);
+        m1CandleService.saveM1Candle(symbol, barTime, barOpen, barHigh, barLow, barClose, barVolume);
         return "Hihi";
     }
 
+    @RequestMapping(value = "/patterns", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public String patternM1Candles(HttpServletRequest request) {
+
+        m1CandlePatternMiner.buildData();
+        return "Hihi";
+    }
 }

@@ -1,55 +1,33 @@
 package net.ionoff.forex.ea.model;
 
+import net.ionoff.forex.ea.model.constant.Period;
+
 import javax.persistence.*;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
 
 @MappedSuperclass
-public abstract class Candle implements Entity {
-	
+public class Candle implements Entity {
 	private static final long serialVersionUID = 1L;
-	
-	public enum PERIOD {
-		M1(1), M5(2), M15(3), M30(4), H1(5), H4(6), D1(7), W1(8), MN1(9);
-		
-		private final int value;
-		
-		PERIOD(int value) {
-			this.value = value;
-		}
-		
-		public int getValue() {
-			return this.value;
-		}
-		
-		public static PERIOD parse(int period) {
-			for (PERIOD p : PERIOD.values()) {
-				if (p.getValue() == period) {
-					return p;
-				}
-			}
-			throw new IllegalArgumentException("Invalid period number value: " + period);
-		}
-		
-		public static String getName(int period) {
-			return parse(period).toString();
-		}
-	}
+	public static final DateTimeFormatter MT4_CSV_DATE_FORMAT = DateTimeFormatter
+			.ofPattern("yyyy.MM.dd,HH:mm")
+			.withZone(ZoneOffset.UTC);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-
-	@Column(name = "time_")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date time;
-	private double high;
+	@Column(name = "time")
+	private Instant time;
 	private double low;
+	private double high;
 	private double open;
 	private double close;
 	private long volume;
-	private long volBuy;
-	private long volSell;
+
+	@Transient
+	private Period period;
 
 	@Transient
 	private Calendar calendar;
@@ -61,10 +39,10 @@ public abstract class Candle implements Entity {
 		this.id = id;
 	}
 
-	public Date getTime() {
+	public Instant getTime() {
 		return time;
 	}
-	public void setTime(Date time) {
+	public void setTime(Instant time) {
 		this.time = time;
 	}
 	
@@ -138,43 +116,28 @@ public abstract class Candle implements Entity {
 		}
 	}
 
-	public long getVolSell() {
-		return volSell;
-	}
-	public void setVolSell(long volSell) {
-		this.volSell = volSell;
-	}
-
-	public long getVolBuy() {
-		return volBuy;
-	}
-	public void setVolBuy(long volBuy) {
-		this.volBuy = volBuy;
-	}
-
-
 	public double getHeigh() {
 		return high - low;
 	}
-	
-	public Calendar getCalendar() {
-		if (time == null) {
-			calendar = null;
-			return null;
-		}
-		if (calendar == null) {
-			calendar = Calendar.getInstance();
-			calendar.setTime(time);
-		}
-		return calendar;
+
+	public void setPeriod(Period period) {
+		this.period = period;
 	}
-	
-	public boolean isInEuUsSession() {
-		int hour = getCalendar().get(Calendar.HOUR_OF_DAY);
-		return hour >= 9 || hour < 2;
+
+	public Period getPeriod() {
+		return period;
 	}
-	
-	public int getPeriod() {
-		return 0;
+
+	public String toMt4CsvLine() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(MT4_CSV_DATE_FORMAT.format(time))
+				.append(",").append(open)
+				.append(",").append(high)
+				.append(",").append(low)
+				.append(",").append(close)
+				.append(",").append(volume)
+				.append("\n");
+		return sb.toString();
 	}
+
 }

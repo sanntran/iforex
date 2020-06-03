@@ -1,7 +1,5 @@
 package net.ionoff.forex.ea.model;
 
-import net.ionoff.forex.ea.model.constant.Period;
-
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.ZoneOffset;

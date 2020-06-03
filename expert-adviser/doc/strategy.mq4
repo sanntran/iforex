@@ -7,7 +7,8 @@
 //+------------------------------------------------------------------+
 #property version   "1.00"
 #property strict
-#include <mql4-http.mqh>
+#include <Wininet.mqh>
+#include <JAson.mqh>
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -28,9 +29,10 @@ void OnDeinit(const int reason) {
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
+  
 void OnTick() {
    MqlTick lastTick;
-   string url = StringConcatenate("http://localhost:8008/iforex/api/ticks?symbol=", Symbol());
+   string url = "http://localhost:8080/iforex/ticks?symbol=" + Symbol();
    //---
    if (SymbolInfoTick(Symbol(), lastTick)) {
       url = StringConcatenate(url, 
@@ -38,20 +40,13 @@ void OnTick() {
                               "&tickbid=", lastTick.bid, 
                               "&tickask=", lastTick.ask,
                               "&ticklast=", lastTick.last);
-   }
-   url = StringConcatenate(url, 
-                              "&m1BarTime=", iTime(Symbol(),PERIOD_M1,0),
-                              "&m1BarOpen=", iOpen(Symbol(),PERIOD_M1,0),
-                              "&m1BarHigh=", iHigh(Symbol(),PERIOD_M1,0),
-                              "&m1BarLow=", iLow(Symbol(),PERIOD_M1,0),
-                              "&m1BarClose=", iClose(Symbol(),PERIOD_M1,0),
-                              "&m1BarVolume=", iVolume(Symbol(),PERIOD_M1,0));
-   
-   string decision = httpGET(url);
-
-   Print("My machine's IP is ", decision);
-   
+   }   
+   string decision = HttpGET(url);
+   CJAVal json;
+   json.Deserialize(decision);
+   Print("Decistion action ", json["action"].ToStr());
 }
+
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+

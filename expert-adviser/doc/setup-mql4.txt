@@ -1,76 +1,18 @@
 1. 	Setup HTTP library:
-	Copy mql4-http.mqh to Include folder inside MetaEditor
+	MetaEditor Navigator -> Include -> Right click -> Open Folder
+	Copy file 'Wininet.mqh' and paste to folder 'Include'
+
+2.	Setup Expert Advisors:
+	MetaEditor Navigator -> Experts -> Right click -> Open Folder
+	Copy 'strategy.mq4' and paste to folder 'Experts'
 	
-2. 	In MetaTrader Tools -> Options -> Expert Advisors -> Allow DLL imports 
-3. 	Create new EA by using 
-//+------------------------------------------------------------------+
-//|                                                       TestEA.mq4 |
-//|                                                         SannTran |
-//|                                           https://www.ionoff.net |
-//+------------------------------------------------------------------+
-#property version   "1.00"
-#property strict
-#include <mql4-http.mqh>
-//+------------------------------------------------------------------+
-//| Expert initialization function                                   |
-//+------------------------------------------------------------------+
-int OnInit()
-  {
-//--- create timer
-   EventSetTimer(60);
-      
-//---
-   return(INIT_SUCCEEDED);
-  }
-//+------------------------------------------------------------------+
-//| Expert deinitialization function                                 |
-//+------------------------------------------------------------------+
-void OnDeinit(const int reason)
-  {
-//--- destroy timer
-   EventKillTimer();
-      
-  }
-//+------------------------------------------------------------------+
-//| Expert tick function                                             |
-//+------------------------------------------------------------------+
-void OnTick()
-  {
-//---
-   string myIP = httpGET("http://localhost:8008/iforex/api/decisions?value=a&time=b");
+3. 	In MetaTrader Tools -> Options -> Expert Advisors
+	- Allow automate trading
+	- Allow DLL imports
+	- Allow WebRequest for listed URLs
 
-  Print("My machine's IP is ", myIP);
+4. 	Start Expert Advidsors:
+	Metatrader Navigator -> Expert Advisor -> Attach to chart
 
-  }
-//+------------------------------------------------------------------+
-//| Timer function                                                   |
-//+------------------------------------------------------------------+
-void OnTimer()
-  {
-//---
-   
-  }
-//+------------------------------------------------------------------+
-//| Tester function                                                  |
-//+------------------------------------------------------------------+
-double OnTester()
-  {
-//---
-   double ret=0.0;
-//---
-
-//---
-   return(ret);
-  }
-//+------------------------------------------------------------------+
-//| ChartEvent function                                              |
-//+------------------------------------------------------------------+
-void OnChartEvent(const int id,
-                  const long &lparam,
-                  const double &dparam,
-                  const string &sparam)
-  {
-//---
-   
-  }
-//+------------------------------------------------------------------+
+5. 	Stop Expert Advisors:
+	Find Expert Advisor at top-right corner of chart -> Right click -> Expert Advisors -> Remove

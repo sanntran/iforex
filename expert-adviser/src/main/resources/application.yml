@@ -1,5 +1,5 @@
 server:
-  servlet.context-path: /
+  servlet.context-path: /iforex
 
 ## Spring DATASOURCE (DataSourceAutoConfiguration & DataSourceProperties)
 spring:

@@ -1,31 +1,47 @@
 package net.ionoff.forex.ea.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.*;
+import java.time.Instant;
 
 @Getter
 @Setter
 @Builder
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "orders")
 public class Order {
 	
 	public enum TYPE {
-		BUY, SELL
+		BUY(0), SELL(1);
+		private int value;
+		TYPE(int value) {
+			this.value = value;
+		}
+		public int getValue() {
+			return value;
+		}
 	}
-		
-	private String symbol;
-	private double size;
-	private String type;
-	private Date openTime;
-	private Date closeTime;
-	private double openPrice;
-	private double closePrice;
-	private double stopLoss;
-	private double takeProfit;
-	private double swap;
-	private double spread;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
+	private Long ticket;
+	private Double lots;
+	private Integer type;
+	private Double profit;
+	private Instant openTime;
+	private Instant closeTime;
+	private Double openPrice;
+	private Double closePrice;
+	private Double stopLoss;
+	private Double takeProfit;
+	private Double swap;
+	// private Double commission; // for share/stock only
 	private String comment;
+	private Instant expiration;
 
 }

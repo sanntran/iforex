@@ -13,8 +13,7 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit() {
-   //--- Create timer
-   EventSetTimer(60);
+   EventSetTimer(5); //every 5 seconds
    //---
    return(INIT_SUCCEEDED);
 }
@@ -24,35 +23,60 @@ int OnInit() {
 void OnDeinit(const int reason) {
 //--- Destroy timer
    EventKillTimer();
-      
+
 }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-  
+
 void OnTick() {
    MqlTick lastTick;
-   string url = "http://localhost:8080/iforex/ticks?symbol=" + Symbol();
+
    //---
    if (SymbolInfoTick(Symbol(), lastTick)) {
-      url = StringConcatenate(url, 
-                              "&ticktime=", lastTick.time,
-                              "&tickbid=", lastTick.bid, 
-                              "&tickask=", lastTick.ask,
-                              "&ticklast=", lastTick.last);
-   }   
-   string decision = HttpGET(url);
-   CJAVal json;
-   json.Deserialize(decision);
-   Print("Decistion action ", json["action"].ToStr());
+      string url = "http://localhost:8080/iforex/ticks?method=post"
+                  + "&symbol=" + Symbol()
+                  + "&time=" + lastTick.time
+                  + "&bid=" + lastTick.bid
+                  + "&ask=" + lastTick.ask
+                  + "&last=" + lastTick.last;
+   }
+   //string decision = HttpGET(url);
+   //CJAVal json;
+   //json.Deserialize(decision);
+   //Print("Decistion action ", json["action"].ToStr());
 }
 
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
 void OnTimer() {
-   
+   int totalOrders = OrdersTotal();
+   Print(totalOrders);
+   for( int i = 0 ; i < OrdersTotal() ; i++ ) {
+      // select the order of index i selecting by position and from the pool of market/pending trades
+      OrderSelect( i, SELECT_BY_POS, MODE_TRADES ); // select active/opening order by index of order in order pool
+      string url = "http://localhost:8080/iforex/orders?method=put"
+            + "&symbol=" + OrderSymbol()
+            + "&ticket=" + OrderTicket()
+            + "&type=" + OrderType()
+            + "&lots=" + OrderLots()
+            + "&openPrice=" + OrderOpenPrice()
+            + "&openTime=" + OrderOpenTime()
+            + "&profit=" + OrderProfit()
+            + "&stopLoss=" + OrderStopLoss()
+            + "&takeProfit=" + OrderTakeProfit()
+            + "&swap=" + OrderSwap()
+            + "&comment=" + OrderComment()
+            // + "&comission=" + OrderCommission()
+            + "&expiration" + OrderExpiration();
+
+   CJAVal json = SendHttpGET(url);
+   Print("Response ", json["code"].ToStr());
+   }
+
 }
+
 
 //+------------------------------------------------------------------+
 //| Tester function                                                  |

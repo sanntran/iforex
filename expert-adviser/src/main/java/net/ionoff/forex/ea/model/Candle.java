@@ -12,7 +12,6 @@ public class Candle implements Entity {
 	public static final DateTimeFormatter MT4_CSV_DATE_FORMAT = DateTimeFormatter
 			.ofPattern("yyyy.MM.dd,HH:mm")
 			.withZone(ZoneOffset.UTC);
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;

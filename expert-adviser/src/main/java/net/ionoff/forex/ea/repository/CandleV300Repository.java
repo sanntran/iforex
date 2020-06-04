@@ -11,15 +11,15 @@ import java.util.List;
 @Repository
 public interface CandleV300Repository extends JpaRepository<CandleV300, Long> {
 
-    @Query(value = "SELECT * FROM candle_v300 WHERE id in (:ids)",
+    @Query(value = "SELECT * FROM v300_candles WHERE id in (:ids)",
             nativeQuery = true)
     List<CandleV300> findByIds(@Param("ids") List<Long> ids);
 
-    @Query(value = "SELECT * FROM candle_v300 WHERE low = (SELECT MIN(c.low) FROM candle_v300 c WHERE c.id >= :fromId AND c.id <= :toId) LIMIT 1",
+    @Query(value = "SELECT * FROM v300_candles WHERE low = (SELECT MIN(c.low) FROM v300_candles c WHERE c.id >= :fromId AND c.id <= :toId) LIMIT 1",
             nativeQuery = true)
     CandleV300 findLowest(@Param("fromId") Long from, @Param("toId") Long toId);
 
-    @Query(value = "SELECT * FROM candle_v300 WHERE high = (SELECT MAX(c.high) FROM candle_v300 c WHERE c.id >= :fromId AND c.id <= :toId) LIMIT 1",
+    @Query(value = "SELECT * FROM v300_candles WHERE high = (SELECT MAX(c.high) FROM v300_candles c WHERE c.id >= :fromId AND c.id <= :toId) LIMIT 1",
             nativeQuery = true)
     CandleV300 findHighest(@Param("fromId") Long from, @Param("toId") Long toId);
 }

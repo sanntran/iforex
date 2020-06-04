@@ -37,7 +37,7 @@ public class TickController {
         System.out.println(symbol + tickTime);
         return Decision.builder()
                 .action(Decision.ACTION.NO_ORDER.name())
-                .order(Order.builder().type(Order.TYPE.BUY.name()).build()).build();
+                .order(Order.builder().type(Order.TYPE.BUY.getValue()).build()).build();
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.GET, produces = "application/json; charset=utf-8")

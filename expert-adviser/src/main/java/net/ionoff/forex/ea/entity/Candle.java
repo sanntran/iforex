@@ -1,4 +1,6 @@
-package net.ionoff.forex.ea.model;
+package net.ionoff.forex.ea.entity;
+
+import net.ionoff.forex.ea.constant.Period;
 
 import javax.persistence.*;
 import java.time.Instant;

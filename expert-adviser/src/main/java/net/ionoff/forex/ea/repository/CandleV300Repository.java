@@ -1,6 +1,6 @@
 package net.ionoff.forex.ea.repository;
 
-import net.ionoff.forex.ea.model.CandleV300;
+import net.ionoff.forex.ea.entity.CandleV300;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

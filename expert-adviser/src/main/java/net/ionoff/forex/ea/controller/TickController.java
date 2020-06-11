@@ -1,15 +1,18 @@
 package net.ionoff.forex.ea.controller;
 
-import net.ionoff.forex.ea.model.Decision;
-import net.ionoff.forex.ea.model.Order;
-import net.ionoff.forex.ea.service.TickService;
+import net.ionoff.forex.ea.entity.Decision;
+import net.ionoff.forex.ea.entity.Order;
+import net.ionoff.forex.ea.model.TickDto;
 import net.ionoff.forex.ea.service.CandleV300Service;
 import net.ionoff.forex.ea.service.PatternV300Service;
+import net.ionoff.forex.ea.service.TickService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
+import java.time.OffsetDateTime;
+
+import static net.ionoff.forex.ea.constant.Symbol.assertValid;
 
 @RestController
 @RequestMapping("/ticks")
@@ -27,14 +30,13 @@ public class TickController {
     @RequestMapping(method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Decision newTick(@RequestParam("symbol") String symbol,
-                            @RequestParam(name = "ticktime", required = false) String tickTime,
-                            @RequestParam(name = "tickbid", required = false) double tickBid,
-                            @RequestParam(name = "tickask", required = false) double tickAsk,
-                            @RequestParam(name = "ticklast", required = false) double tickLast,
-                            @RequestParam(name = "error", required = false) String error) {
+                            @RequestParam(name = "time") String time,
+                            @RequestParam(name = "bid") Double bid,
+                            @RequestParam(name = "ask") Double ask
+                                ) {
+        assertValid(symbol);
 
-        tickService.handleTick(symbol, tickTime, tickBid, tickAsk, tickLast, error);
-        System.out.println(symbol + tickTime);
+        tickService.handleTick(TickDto.builder().time(time).ask(ask).bid(bid).build());
         return Decision.builder()
                 .action(Decision.ACTION.NO_ORDER.name())
                 .order(Order.builder().type(Order.TYPE.BUY.getValue()).build()).build();

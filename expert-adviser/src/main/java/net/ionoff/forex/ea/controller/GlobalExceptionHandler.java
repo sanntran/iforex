@@ -1,9 +1,10 @@
 package net.ionoff.forex.ea.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import net.ionoff.forex.ea.exception.MethodNotSupportedException;
 import net.ionoff.forex.ea.exception.RecordNotFoundException;
 import net.ionoff.forex.ea.exception.SymbolNotSupportedException;
-import net.ionoff.forex.ea.model.Message;
+import net.ionoff.forex.ea.model.ResponseDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RecordNotFoundException.class)
-    public ResponseEntity<Message> handleRecordNotFoundException(RecordNotFoundException exception) {
+    public ResponseEntity<ResponseDto> handleRecordNotFoundException(RecordNotFoundException exception) {
         log.error(exception.getMessage());
-        return ResponseEntity.ok(Message.builder().code(HttpStatus.NOT_FOUND.value()).build());
+        return ResponseEntity.ok(ResponseDto.builder().code(HttpStatus.NOT_FOUND.value()).build());
     }
 
     @ExceptionHandler(SymbolNotSupportedException.class)
-    public ResponseEntity<Message> handleSymbolNotSupportedException(SymbolNotSupportedException exception) {
+    public ResponseEntity<ResponseDto> handleSymbolNotSupportedException(SymbolNotSupportedException exception) {
         log.error(exception.getMessage());
-        return ResponseEntity.ok(Message.builder().code(HttpStatus.BAD_REQUEST.value()).build());
+        return ResponseEntity.ok(ResponseDto.builder().code(HttpStatus.BAD_REQUEST.value()).build());
+    }
+
+    @ExceptionHandler(MethodNotSupportedException.class)
+    public ResponseEntity<ResponseDto> handleMethodNotSupportedException(MethodNotSupportedException exception) {
+        log.error(exception.getMessage());
+        return ResponseEntity.ok(ResponseDto.builder().code(HttpStatus.METHOD_NOT_ALLOWED.value()).build());
     }
 
     @Override
@@ -37,12 +44,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         } else {
             log.error(ex.getMessage());
         }
-        return ResponseEntity.ok(Message.builder().code(status.value()).build());
+        return ResponseEntity.ok(ResponseDto.builder().code(status.value()).build());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
         log.error(ex.getMessage(), ex);
-        return ResponseEntity.ok(Message.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build());
+        return ResponseEntity.ok(ResponseDto.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build());
     }
 }

@@ -1,6 +1,6 @@
 package net.ionoff.forex.ea.repository;
 
-import net.ionoff.forex.ea.model.PatternV300;
+import net.ionoff.forex.ea.entity.PatternV300;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

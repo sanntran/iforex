@@ -1,11 +1,11 @@
-package net.ionoff.forex.ea.model;
+package net.ionoff.forex.ea.constant;
 
-public enum Volume {
-    V300(300);
+public enum Period {
+    M1(1), M5(2), M15(3), M30(4), H1(5), H4(6), D1(7), W1(8), MN1(9);
 
     private final int value;
 
-    Volume(int value) {
+    Period(int value) {
         this.value = value;
     }
 
@@ -13,8 +13,8 @@ public enum Volume {
         return this.value;
     }
 
-    public static Volume parse(int period) {
-        for (Volume p : Volume.values()) {
+    public static Period parse(int period) {
+        for (Period p : Period.values()) {
             if (p.getValue() == period) {
                 return p;
             }

@@ -1,4 +1,4 @@
-package net.ionoff.forex.ea.model;
+package net.ionoff.forex.ea.entity;
 
 import lombok.Builder;
 import lombok.Getter;

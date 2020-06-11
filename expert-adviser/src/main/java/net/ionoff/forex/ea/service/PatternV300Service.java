@@ -1,7 +1,7 @@
 package net.ionoff.forex.ea.service;
 
-import net.ionoff.forex.ea.model.CandleV300;
-import net.ionoff.forex.ea.model.PatternV300;
+import net.ionoff.forex.ea.entity.CandleV300;
+import net.ionoff.forex.ea.entity.PatternV300;
 import net.ionoff.forex.ea.repository.CandleV300Repository;
 import net.ionoff.forex.ea.repository.PatternV300Repository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package net.ionoff.forex.ea.event;
 
-import net.ionoff.forex.ea.model.Candle;
+import net.ionoff.forex.ea.entity.Candle;
 
 import java.util.Observable;
 import java.util.Observer;

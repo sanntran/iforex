@@ -1,4 +1,4 @@
-package net.ionoff.forex.ea.entity;
+package net.ionoff.forex.ea.model;
 
 public class Trend {
 	

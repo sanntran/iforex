@@ -1,22 +1,19 @@
 package net.ionoff.forex.ea.service;
 
-import net.ionoff.forex.ea.model.ActionDto;
-import net.ionoff.forex.ea.model.TickDto;
-import net.ionoff.forex.ea.repository.CandleV300Repository;
+import net.ionoff.forex.ea.model.Tick;
+import net.ionoff.forex.ea.repository.TickRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Component
-@Transactional
 public class TickService {
 
     @Autowired
-    private CandleV300Repository v300CandleRepository;
+    private TickRepository tickRepository;
 
-    public Optional<ActionDto> handleTick(TickDto tickDto) {
-        return Optional.empty();
+    public Tick handleTick(Tick tick) {
+        System.out.println("new tick: " + tick.toString());
+        return tick;
+        //return tickRepository.save(tick);
     }
 }

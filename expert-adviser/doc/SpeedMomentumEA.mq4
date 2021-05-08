@@ -1,9 +1,8 @@
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
-//|                                                V300PatternEA.mq4 |
+//|                                                SpeedMomentumEA.mq4 |
 //|                                                         SannTran |
-//|                                          https://www.xapxinh.net |
 //+------------------------------------------------------------------+
 #property version   "1.00"
 #property strict
@@ -19,7 +18,7 @@ int OnInit() {
 }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
-//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+a
 void OnDeinit(const int reason) {
 //--- Destroy timer
    EventKillTimer();
@@ -86,22 +85,24 @@ void OnTimer() {
 
    CJAVal json = SendHttpGET(url);
    Print("Response ", json["code"].ToStr());
-   if (json["code"].ToInt() == 201) { // created
-      PlaceOrder(json["body"]["type"].ToInt(), json["body"]["volume"].ToDbl(),
-                  json["body"]["stopLoss"].ToDbl(), json["body"]["takeProfit"].ToDbl());
-   } else if (json["code"].ToInt() == 205) { // reset // close curret order
-      CloseOrder(json["body"]["ticket"].ToInt());
-   } else if (json["code"].ToInt() == 206) { // partial // modify curret order
-      ModifyOrder(json["body"]["ticket"].ToInt(),
-                  json["body"]["stopLoss"].ToDbl(), json["body"]["takeProfit"].ToDbl());
+   if (json["action"].ToInt() == 0) { // nothing
+      // nothing to do
+   } else if (json["action"].ToInt() == 1) { // place order
+      PlaceOrder(json["order"]["type"].ToInt(), json["order"]["lots"].ToDbl(),
+                  json["body"]["stopLoss"].ToDbl(), json["order"]["takeProfit"].ToDbl());
+   } else if (json["code"].ToInt() == 2) { // close order
+      CloseOrder(json["order"]["ticket"].ToInt());
+   } else if (json["code"].ToInt() == 3) { // modify order
+      ModifyOrder(json["order"]["ticket"].ToInt(),
+                  json["order"]["stopLoss"].ToDbl(), json["order"]["takeProfit"].ToDbl());
    }
 }
 
-bool PlaceOrder(int type, double volume, double stopLoss, double takeProfit) {
+bool PlaceOrder(int type, double lots, double stopLoss, double takeProfit) {
    if (type == OP_BUY) {
-      return OrderSend(Symbol(), OP_BUY, volume, Bid, 2*Point, stopLoss, takeProfit);
+      return OrderSend(Symbol(), OP_BUY, lots, Bid, 2*Point, stopLoss, takeProfit);
    } else if (type == OP_SELL) {
-      return OrderSend(Symbol(), OP_SELL, volume, Ask, 2*Point, stopLoss, takeProfit);
+      return OrderSend(Symbol(), OP_SELL, lots, Ask, 2*Point, stopLoss, takeProfit);
    }
    return false;
 }

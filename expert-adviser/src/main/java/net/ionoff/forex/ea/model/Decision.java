@@ -1,4 +1,4 @@
-package net.ionoff.forex.ea.entity;
+package net.ionoff.forex.ea.model;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +14,7 @@ public class Decision {
 		return this;
 	}
 
-	public enum ACTION {
-		NO_ORDER, OPEN_ORDER, CLOSE_ORDER
-	}
+
 
 	private String action;
 	private Order order;

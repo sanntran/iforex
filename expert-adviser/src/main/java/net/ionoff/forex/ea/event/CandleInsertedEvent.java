@@ -1,6 +1,6 @@
 package net.ionoff.forex.ea.event;
 
-import net.ionoff.forex.ea.entity.Candle;
+import net.ionoff.forex.ea.model.Candle;
 
 public class CandleInsertedEvent extends CandleEvent {
 

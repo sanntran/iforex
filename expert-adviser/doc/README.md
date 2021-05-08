@@ -16,3 +16,7 @@
 
 5. 	Stop Expert Advisors:
 	Find Expert Advisor at top-right corner of chart -> Right click -> Expert Advisors -> Remove
+
+6.  Run back testing
+    Menu View -> Strategy Tester -> Select Expert Adviser -> ... -> Start 
+    

@@ -1,4 +1,4 @@
-package net.ionoff.forex.ea.entity;
+package net.ionoff.forex.ea.model;
 
 import net.ionoff.forex.ea.constant.Period;
 
@@ -6,7 +6,6 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 
 @MappedSuperclass
 public class Candle implements Entity {
@@ -23,13 +22,10 @@ public class Candle implements Entity {
 	private double high;
 	private double open;
 	private double close;
-	private long volume;
+	private int volume;
 
 	@Transient
 	private Period period;
-
-	@Transient
-	private Calendar calendar;
 
 	public long getId() {
 		return id;
@@ -73,10 +69,10 @@ public class Candle implements Entity {
 		this.close = close;
 	}
 
-	public long getVolume() {
+	public int getVolume() {
 		return volume;
 	}
-	public void setVolume(long volume) {
+	public void setVolume(int volume) {
 		this.volume = volume;
 	}
 	
@@ -138,5 +134,4 @@ public class Candle implements Entity {
 				.append("\n");
 		return sb.toString();
 	}
-
 }

@@ -1,16 +1,18 @@
 package net.ionoff.forex.ea.controller;
 
-import net.ionoff.forex.ea.entity.Decision;
-import net.ionoff.forex.ea.entity.Order;
-import net.ionoff.forex.ea.model.TickDto;
-import net.ionoff.forex.ea.service.CandleV300Service;
-import net.ionoff.forex.ea.service.PatternV300Service;
+import net.ionoff.forex.ea.model.Action;
+import net.ionoff.forex.ea.model.Message;
+import net.ionoff.forex.ea.model.Tick;
+import net.ionoff.forex.ea.exception.MethodNotSupportedException;
 import net.ionoff.forex.ea.service.TickService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static net.ionoff.forex.ea.constant.Symbol.assertValid;
 
@@ -19,44 +21,30 @@ import static net.ionoff.forex.ea.constant.Symbol.assertValid;
 public class TickController {
 
     @Autowired
-    TickService tickService;
-
-    @Autowired
-    CandleV300Service candleV300Service;
-
-    @Autowired
-    PatternV300Service patternV300Service;
+    private TickService tickService;
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Decision newTick(@RequestParam("symbol") String symbol,
-                            @RequestParam(name = "time") String time,
-                            @RequestParam(name = "bid") Double bid,
-                            @RequestParam(name = "ask") Double ask
-                                ) {
+    public Message handleTick(@RequestParam("symbol") String symbol,
+                              @RequestParam("method") String method,
+                              @RequestParam(name = "time") String time,
+                              @RequestParam(name = "bid") Double bid,
+                              @RequestParam(name = "ask") Double ask) {
         assertValid(symbol);
-
-        tickService.handleTick(TickDto.builder().time(time).ask(ask).bid(bid).build());
-        return Decision.builder()
-                .action(Decision.ACTION.NO_ORDER.name())
-                .order(Order.builder().type(Order.TYPE.BUY.getValue()).build()).build();
+        if (HttpMethod.POST.name().equals(method)) {
+            System.out.println(time);
+            Tick tick = Tick.builder()
+                            .time(toInstant(time))
+                            .ask(bid)
+                            .bid(ask)
+                            .build();
+            tickService.handleTick(tick);
+            return new Message(HttpStatus.OK.value());
+        }
+        throw new MethodNotSupportedException(method);
     }
 
-    @RequestMapping(value = "/import", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String importTick(HttpServletRequest request) {
-
-        candleV300Service.importV300Candles();
-
-        return "hihi";
-    }
-
-    @RequestMapping(value = "/patterns", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String distance(HttpServletRequest request) {
-
-        patternV300Service.buildData();
-
-        return "hihi";
+    private static Instant toInstant(String time) {
+        return OffsetDateTime.parse(time).toInstant();
     }
 }

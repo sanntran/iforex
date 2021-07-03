@@ -29,7 +29,9 @@ void OnDeinit(const int reason) {
 //+------------------------------------------------------------------+
 void OnTick() {
    MqlTick lastTick;
-
+   if (Volume[0]==1 ) {
+      //new candle created
+   }
    //---
    if (SymbolInfoTick(Symbol(), lastTick)) {
       string url = "http://localhost:8080/iforex/ticks?method=POST"
@@ -37,7 +39,13 @@ void OnTick() {
                   + "&time=" + FormatOffsetDateTime(lastTick.time)
                   + "&bid=" + lastTick.bid
                   + "&ask=" + lastTick.ask;
-      SendHttpGET(url);
+      CJAVal json = SendHttpGET(url);
+      if (json["code"].ToInt() == 0) { // nothing
+         // candle update
+      } else if (json["code"].ToInt() == 1) { // place order
+         // candle closed
+         getActionOnCandleClosed();
+      }
    }
 }
 
@@ -59,35 +67,50 @@ string FormatOffsetDateTime(datetime time) {
 //| Timer function                                                   |
 //+------------------------------------------------------------------+
 void OnTimer() {
-   int totalOrders = OrdersTotal();
-   Print(totalOrders);
-   for( int i = 0 ; i < OrdersTotal() ; i++ ) {
-      // select the order of index i selecting by position and from the pool of market/pending trades
-      OrderSelect( i, SELECT_BY_POS, MODE_TRADES );
-      string url = "http://localhost:8080/iforex/orders?method=PUT"
-            + "&symbol=" + OrderSymbol()
-            + "&ticket=" + OrderTicket()
-            + "&type=" + OrderType()
-            + "&lots=" + OrderLots()
-            + "&openPrice=" + OrderOpenPrice()
-            + "&openTime=" + FormatOffsetDateTime(OrderOpenTime())
-            + "&profit=" + OrderProfit()
-            + "&stopLoss=" + OrderStopLoss()
-            + "&takeProfit=" + OrderTakeProfit()
-            + "&swap=" + OrderSwap()
-            + "&comment=" + OrderComment();
 
-      CJAVal json = SendHttpGET(url);
-      Print("Response ", json["code"].ToStr());
-   }
+}
+
+void getActionOnCandleClosed() {
    string url = "http://localhost:8080/iforex/actions?method=GET"
          + "&symbol=" + OrderSymbol();
 
-   CJAVal json = SendHttpGET(url);
-   Print("Response ", json["code"].ToStr());
-   if (json["action"].ToInt() == 0) { // nothing
+   int openOrders = 0;
+   for( int i = 0 ; i < OrdersTotal() ; i++ ) {
+      // select the order of index i selecting by position and from the pool of market/pending trades
+      if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES) && (OrderType()==OP_BUY || OrderType()==OP_SELL)) {
+         string url = "http://localhost:8080/iforex/actions?method=GET"
+                        + "&symbol=" + OrderSymbol()
+                        + "&ticket=" + OrderTicket()
+                        + "&type=" + OrderType()
+                        + "&lots=" + OrderLots()
+                        + "&openPrice=" + OrderOpenPrice()
+                        + "&openTime=" + FormatOffsetDateTime(OrderOpenTime())
+                        + "&profit=" + OrderProfit()
+                        + "&stopLoss=" + OrderStopLoss()
+                        + "&takeProfit=" + OrderTakeProfit()
+                        + "&swap=" + OrderSwap()
+                        + "&comment=" + OrderComment();
+         openOrders ++;
+         CJAVal json = SendHttpGET(url);
+         handleActionResponse(json);
+      }
+   }
+   if (openOrders == 0) {
+      string url = "http://localhost:8080/iforex/actions?method=GET"
+            + "&symbol=" + OrderSymbol();
+      Print("URL ", url);
+      CJAVal json = SendHttpGET(url);
+      handleActionResponse(json);
+   }
+}
+
+void handleActionResponse(CJAVal &json) {
+   Print("Action response ", json["code"].ToStr());
+   if (json["code"].ToInt() == 0) { // nothing
       // nothing to do
-   } else if (json["action"].ToInt() == 1) { // place order
+      // Print("No action to do");
+   } else if (json["code"].ToInt() == 1) { // place order
+      Print("Place new order");
       PlaceOrder(json["order"]["type"].ToInt(), json["order"]["lots"].ToDbl(),
                   json["body"]["stopLoss"].ToDbl(), json["order"]["takeProfit"].ToDbl());
    } else if (json["code"].ToInt() == 2) { // close order
@@ -100,9 +123,11 @@ void OnTimer() {
 
 bool PlaceOrder(int type, double lots, double stopLoss, double takeProfit) {
    if (type == OP_BUY) {
-      return OrderSend(Symbol(), OP_BUY, lots, Bid, 2*Point, stopLoss, takeProfit);
+      return OrderSend(Symbol(), OP_BUY, 0.1, Ask, 3, 0, 0, "", 0, 0, Blue);
+      // return OrderSend(Symbol(), OP_BUY, lots, Bid, 2*Point, stopLoss, takeProfit);
    } else if (type == OP_SELL) {
-      return OrderSend(Symbol(), OP_SELL, lots, Ask, 2*Point, stopLoss, takeProfit);
+      OrderSend(Symbol(), OP_SELL, 0.1, Bid, 3, 0, 0, "" , 0, 0, Red);
+      // return OrderSend(Symbol(), OP_SELL, lots, Ask, 2*Point, stopLoss, takeProfit);
    }
    return false;
 }
@@ -139,6 +164,3 @@ void OnChartEvent(const int id,
                   const double &dparam,
                   const string &sparam) {
 //---
-   
-}
-//+------------------------------------------------------------------+

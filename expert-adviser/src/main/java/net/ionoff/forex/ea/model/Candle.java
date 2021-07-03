@@ -1,13 +1,24 @@
 package net.ionoff.forex.ea.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.ionoff.forex.ea.constant.Period;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
-@MappedSuperclass
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@javax.persistence.Entity
+@Table(name = "candles")
 public class Candle implements Entity {
 	private static final long serialVersionUID = 1L;
 	public static final DateTimeFormatter MT4_CSV_DATE_FORMAT = DateTimeFormatter
@@ -23,58 +34,10 @@ public class Candle implements Entity {
 	private double open;
 	private double close;
 	private int volume;
+	private double pivot;
 
 	@Transient
 	private Period period;
-
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public Instant getTime() {
-		return time;
-	}
-	public void setTime(Instant time) {
-		this.time = time;
-	}
-	
-	public double getHigh() {
-		return high;
-	}
-	public void setHigh(double high) {
-		this.high = high;
-	}
-	
-	public double getLow() {
-		return low;
-	}
-	public void setLow(double low) {
-		this.low = low;
-	}
-	
-	public double getOpen() {
-		return open;
-	}
-	public void setOpen(double open) {
-		this.open = open;
-	}
-	
-	public double getClose() {
-		return close;
-	}
-	public void setClose(double close) {
-		this.close = close;
-	}
-
-	public int getVolume() {
-		return volume;
-	}
-	public void setVolume(int volume) {
-		this.volume = volume;
-	}
 	
 	public double getUpperShadow() {
 		if (isBull()) {
@@ -103,24 +66,16 @@ public class Candle implements Entity {
 	}
 	
 	public double getBody() {
-		if (isBull()) {
-			return close - open;
-		}
-		else {
-			return open - close;
-		}
+		return Math.abs(close - open);
 	}
 
-	public double getHeigh() {
-		return high - low;
+	public double getHeight() {
+		return new BigDecimal((high - low) * 100000).intValue();
 	}
 
-	public void setPeriod(Period period) {
-		this.period = period;
-	}
-
-	public Period getPeriod() {
-		return period;
+	@Transient
+	public Instant getCloseTime() {
+		return time.plusSeconds(60); // period 1 minute
 	}
 
 	public String toMt4CsvLine() {
@@ -133,5 +88,18 @@ public class Candle implements Entity {
 				.append(",").append(volume)
 				.append("\n");
 		return sb.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Candle candle = (Candle) o;
+		return Objects.equals(time, candle.time);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(time);
 	}
 }

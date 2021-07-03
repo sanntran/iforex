@@ -1,6 +1,8 @@
 package net.ionoff.forex.ea.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -15,14 +17,14 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table(name = "orders")
 public class Order {
-	
+
 	public enum TYPE {
 		BUY(0), SELL(1);
-		private int value;
+		private Integer value;
 		TYPE(int value) {
 			this.value = value;
 		}
-		public int getValue() {
+		public Integer getValue() {
 			return value;
 		}
 	}
@@ -30,48 +32,52 @@ public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-
-	@Column(name = "ticket")
 	private Long ticket;
-
-	@Column(name = "lots")
 	private Double lots;
-
-	@Column(name = "type")
 	private Integer type;
-
-	@Column(name = "profit")
 	private Double profit;
-
-	@Column(name = "open_time")
 	private Instant openTime;
-
-	@Column(name = "close_time")
 	private Instant closeTime;
-
-	@Column(name = "open_price")
 	private Double openPrice;
-
-	@Column(name = "close_price")
 	private Double closePrice;
-
-	@Column(name = "stop_loss")
 	private Double stopLoss;
-
-	@Column(name = "take_profit")
 	private Double takeProfit;
-
-	@Column(name = "swap")
 	private Double swap;
-
-	@Column(name = "commission")
 	private Double commission; // for share/stock only
-
-	@Column(name = "comment")
 	private String comment;
-
-	@Column(name = "expiration")
 	private Instant expiration;
+	@Column(nullable = false, columnDefinition = "TINYINT(1)")
+	private Boolean waitingForClose;
+
+	@JsonIgnore
+	@Transient
+	public boolean isOpen() {
+		return !isClosed();
+	}
+
+	@JsonIgnore
+	@Transient
+	public boolean isClosed() {
+		return closeTime != null && closePrice != null;
+	}
+
+	@JsonIgnore
+	@Transient
+	public boolean isSell() {
+		return TYPE.SELL.value.equals(type);
+	}
+
+	@JsonIgnore
+	@Transient
+	public boolean isBuy() {
+		return TYPE.BUY.value.equals(type);
+	}
+
+	@JsonIgnore
+	@Transient
+	public boolean isWaitingForClose() {
+		return Boolean.TRUE.equals(waitingForClose);
+	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -2,9 +2,9 @@ package net.ionoff.forex.ea.event;
 
 import net.ionoff.forex.ea.model.Candle;
 
-public class CandleInsertedEvent extends CandleEvent {
+public class CandleClosedEvent extends CandleEvent {
 
-	public CandleInsertedEvent(Candle candle) {
+	public CandleClosedEvent(Candle candle) {
 		super(candle);
 	}
 }

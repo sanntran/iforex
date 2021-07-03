@@ -14,7 +14,7 @@ CREATE TABLE `orders` (
                         `take_profit` double NULL,
                         `swap` double NULL,
                         `commission` double NULL,
-                        `comment` varchar(255) COLLATE utf8_unicode_ci NULL,
+                        `comment` varchar(255) COLLATE utf8_bin NULL,
                         `expiration` timestamp NULL,
                         PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin_ci;
@@ -25,6 +25,18 @@ CREATE TABLE `ticks` (
                        `bid` double NULL,
                        `ask` double NULL,
                        PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
+CREATE TABLE `forex`.`eur_usd_m1_candles` (
+                                            `id` BIGINT NOT NULL AUTO_INCREMENT,
+                                            `name` VARCHAR(255) NULL,
+                                            `time` timestamp NULL,
+                                            `period` VARCHAR(31) NULL,
+                                            `high` DOUBLE NULL,
+                                            `low` DOUBLE NULL,
+                                            `open` DOUBLE NULL,
+                                            `close` DOUBLE NULL,
+                                            `volume` BIGINT NULL,
+                                            PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;

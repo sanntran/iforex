@@ -1,5 +1,6 @@
 package net.ionoff.forex.ea.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @Getter
@@ -9,29 +10,62 @@ import lombok.*;
 @AllArgsConstructor
 public class Action {
 
-	public enum ACTION {
-		NOACTION(0), OPEN_ORDER(1), CLOSE_ORDER(2), MODIFY_ORDER(3) ;
-		private int code;
-		ACTION(int code) {
-			this.code = code;
+	public enum Code {
+		NO_ORDER(0),
+		OPEN_ORDER(1),
+		CLOSE_ORDER(2),
+		MODIFY_ORDER(3),
+		CLOSE_AND_OPEN_ORDER(4);
+
+		private int value;
+		Code(int value) {
+			this.value = value;
 		}
-		public int getCode() {
-			return code;
+		public int getValue() {
+			return value;
 		}
-	}
-	public static Action noOrder() {
-		return Action.builder().code(ACTION.OPEN_ORDER.code).build();
-	}
-	public static ActionBuilder openOrder()  {
-		return Action.builder().code(ACTION.OPEN_ORDER.code);
-	}
-	public static ActionBuilder closeOrder() {
-		return Action.builder().code(ACTION.CLOSE_ORDER.code);
-	}
-	public static ActionBuilder modifyOrder() {
-		return Action.builder().code(ACTION.MODIFY_ORDER.code);
 	}
 
 	private int code;
 	private Order order;
+
+	public static Action noOrder() {
+		return Action.builder().code(Code.NO_ORDER.value).build();
+	}
+
+	public static Action openOrder(Order order)  {
+		return Action.builder()
+				.code(Code.OPEN_ORDER.value)
+				.order(order).build();
+	}
+	public static Action closeOrder(Order order) {
+		return Action.builder()
+				.code(Code.CLOSE_ORDER.value)
+				.order(order).build();
+	}
+	public static Action modifyOrder(Order order) {
+		return Action.builder()
+				.code(Code.MODIFY_ORDER.value)
+				.order(order).build();
+	}
+	public static Action closeAndOpenOrder(Order order) {
+		return Action.builder()
+				.code(Code.CLOSE_AND_OPEN_ORDER.value)
+				.order(order).build();
+	}
+
+	@JsonIgnore
+	public boolean isNoOrder() {
+		return Code.NO_ORDER.value == code;
+	}
+
+	@JsonIgnore
+	public boolean isCloseOrder() {
+		return Code.CLOSE_ORDER.value == code;
+	}
+
+	@JsonIgnore
+	public boolean isOpenOrder() {
+		return Code.OPEN_ORDER.value == code;
+	}
 }

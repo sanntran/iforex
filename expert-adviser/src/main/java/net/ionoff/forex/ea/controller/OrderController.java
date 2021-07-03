@@ -39,7 +39,6 @@ public class OrderController {
                               @RequestParam(name = "swap", required = false) Double swap,
                               @RequestParam(name = "comment", required = false) String comment) {
 
-        assertValid(symbol);
         if (HttpMethod.PUT.name().equals(method)) {
             Order order = Order.builder()
                     .ticket(ticket)

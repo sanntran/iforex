@@ -14,4 +14,12 @@ public class Message {
     public Message(int code) {
         this.code = code;
     }
+
+    public static Message candleUpdated() {
+        return new Message(0, "candle_updated");
+    }
+
+    public static Message candleClosed() {
+        return new Message(1, "candle_closed");
+    }
 }

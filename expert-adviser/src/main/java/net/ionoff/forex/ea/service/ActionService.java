@@ -2,7 +2,9 @@ package net.ionoff.forex.ea.service;
 
 import lombok.AllArgsConstructor;
 import net.ionoff.forex.ea.model.Action;
+import net.ionoff.forex.ea.model.Candle;
 import net.ionoff.forex.ea.model.Order;
+import net.ionoff.forex.ea.repository.CandleRepository;
 import net.ionoff.forex.ea.repository.OrderRepository;
 import net.ionoff.forex.ea.stratergy.ExtremaPointStrategy;
 import net.ionoff.forex.ea.stratergy.MovingAverageStrategy;
@@ -17,9 +19,10 @@ public class ActionService {
     private OrderRepository orderRepository;
     private MovingAverageStrategy movingAverageStrategy;
     private ExtremaPointStrategy extremaPointStrategy;
+    private CandleRepository candleRepository;
 
     public Action getAction() {
-        Action action = extremaPointStrategy.getAction();
+        Action action = movingAverageStrategy.getAction(candleRepository.findLatest().orElse(null));
         return action.isNoOrder() ? action : saveOrder(action);
     }
 
@@ -33,12 +36,13 @@ public class ActionService {
         if (ticket.isClosed()) {
             return Action.closeOrder(order);
         }
-        return extremaPointStrategy.getAction(ticket);
+        Action action = movingAverageStrategy.getAction(ticket, candleRepository.findLatest().orElse(null));
+        return action.isNoOrder() ? action : saveOrder(action);
     }
 
     private Order saveOrder(Order order) {
-        Optional<Order> ticket = orderRepository.findByTicket(order.getTicket());
-        if (!ticket.isPresent()) {
+        Optional<Order> ticket = orderRepository.findLatest();
+        if (!ticket.isPresent() || ticket.get().isClosed()) {
             return orderRepository.save(Order.builder()
                     .ticket(order.getTicket())
                     .openTime(order.getOpenTime())
@@ -56,6 +60,7 @@ public class ActionService {
     }
 
     private Order updateOrder(Order order, Order ticket) {
+        ticket.setTicket(order.getTicket());
         ticket.setProfit(order.getProfit());
         return orderRepository.save(ticket);
     }

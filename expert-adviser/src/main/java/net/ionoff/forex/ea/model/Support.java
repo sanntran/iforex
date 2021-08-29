@@ -5,19 +5,29 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 import java.time.Instant;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-//@javax.persistence.Entity
-//@Table(name = "supports")
+@javax.persistence.Entity
+@Table(name = "supports")
 public class Support {
+
+    public enum Period {
+        SHORT, MEDIUM, LONG
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long candle;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "candle", referencedColumnName = "id")
+    private Candle candle;
     private Instant time;
-    private double value;
-    private boolean active;
+    private String period;
+    private double close;
 }

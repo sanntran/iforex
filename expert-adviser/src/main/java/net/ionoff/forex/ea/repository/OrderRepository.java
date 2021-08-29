@@ -11,12 +11,12 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query(value = "SELECT * FROM orders WHERE ticket = :ticket",
+    @Query(value = "SELECT * FROM orders WHERE ticket = :ticket ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
     Optional<Order> findByTicket(@Param("ticket") Long ticket);
 
 
-    @Query(value = "SELECT * FROM orders WHERE id =(SELECT MAX(id) FROM orders)",
+    @Query(value = "SELECT * FROM orders ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
     Optional<Order> findLatest();
 }

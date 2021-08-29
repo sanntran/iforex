@@ -40,8 +40,8 @@ public class StrategyService {
             candleEventNotifier.fireCandleEvent(new CandleClosedEvent(candle));
             Order order = orderRepository.findLatest().orElse(null);
             Action action = order != null && order.isOpen()
-                    ? movingAverageStrategy.getAction(order)
-                    : movingAverageStrategy.getAction();
+                    ? movingAverageStrategy.getAction(order, candle)
+                    : movingAverageStrategy.getAction(candle);
             if (Action.Code.CLOSE_ORDER.getValue() == action.getCode()) {
                 Order orderToClose = action.getOrder();
                 orderToClose.setProfit(orderToClose.isBuy()
@@ -71,6 +71,6 @@ public class StrategyService {
                                 .build());
             }
         }
-        return Message.candleUpdated();
+        return Message.ok();
     }
 }

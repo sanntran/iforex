@@ -1,13 +1,21 @@
 package net.ionoff.forex.ea.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.vavr.control.Try;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.hibernate.mapping.Collection;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 
 @Getter
 @Setter
@@ -32,6 +40,7 @@ public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	private Instant time;
 	private Long ticket;
 	private Double lots;
 	private Integer type;
@@ -46,8 +55,14 @@ public class Order {
 	private Double commission; // for share/stock only
 	private String comment;
 	private Instant expiration;
+	@Transient
+	private List<Event> events;
 	@Column(nullable = false, columnDefinition = "TINYINT(1)")
 	private Boolean waitingForClose;
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "candle", referencedColumnName = "id")
+	private Candle candle;
 
 	@JsonIgnore
 	@Transient
@@ -73,6 +88,7 @@ public class Order {
 		return TYPE.BUY.value.equals(type);
 	}
 
+
 	@JsonIgnore
 	@Transient
 	public boolean isWaitingForClose() {
@@ -90,5 +106,27 @@ public class Order {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
+	}
+
+	public void addEvent(Event event) {
+		getEvents().add(event);
+		comment = getEvents().stream().map(Enum::name)
+				.collect(Collectors.joining(","));
+	}
+
+	@Transient
+	public List<Event> getEvents() {
+		if (events != null) {
+			return events;
+		}
+		events = new ArrayList<>();
+		if (comment == null) {
+			return events;
+		}
+		for (String event : comment.split(",")) {
+			Optional<Event> e = Try.of(() -> Event.valueOf(event)).toJavaOptional();
+			e.ifPresent(ev -> events.add(ev));
+		}
+		return events;
 	}
 }

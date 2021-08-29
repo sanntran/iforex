@@ -6,12 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
-    @Query(value = "SELECT * FROM predictions WHERE candle = :candleId",
+    @Query(value = "SELECT * FROM predictions ORDER BY id DESC LIMIT :limit",
             nativeQuery = true)
-    Optional<Prediction> findByCandleId(@Param("candleId") Long candleId);
+    List<Prediction> findLatest(@Param("limit") Integer limit);
+
 }

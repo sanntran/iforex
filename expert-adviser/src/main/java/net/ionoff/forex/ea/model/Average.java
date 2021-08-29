@@ -4,15 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
-import java.lang.reflect.Field;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 
 @Builder
 @AllArgsConstructor
@@ -20,44 +16,58 @@ import java.util.Map;
 @Data
 @javax.persistence.Entity
 @Table(name = "averages")
-public class Average {
+public class Average implements Avg {
+
+    public static final Double MAX_DISTANCE = 1165D;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long candle;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "candle", referencedColumnName = "id")
+    private Candle candle;
     private Instant time;
     private Double close;
+    private Double open;
     private Double pivot;
     private Double avgShort;
     private Double avgMedium;
     private Double avgLong;
     private Double distanceAvgShortAvgLong;
     private Double distanceAvgMediumAvgLong;
-
     private Double slopeAvgShort;
     private Double slopeAvgMedium;
     private Double slopeAvgLong;
-    private Double slopeShortAvgShort;
-    private Double slopeShortAvgMedium;
-    private Double slopeShortAvgLong;
-
     private Double slopeDistanceAvgShortAvgLong;
-    private Double slopeShortDistanceAvgShortAvgLong;
-
     private Double slopeDistanceAvgMediumAvgLong;
-    private Double slopeShortDistanceAvgMediumAvgLong;
 
-    private Double slopeSlopeAvgMedium;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "support_candle_short", referencedColumnName = "id")
+    private Candle supportCandleShort;
 
-    private Double supportCloseShort;
-    private Double resistanceCloseShort;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "resistance_candle_short", referencedColumnName = "id")
+    private Candle resistanceCandleShort;
 
-    private Double supportMediumClose;
-    private Double resistanceMediumClose;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "support_candle_medium", referencedColumnName = "id")
+    private Candle supportCandleMedium;
 
-    private Double supportLongClose;
-    private Double resistanceLongClose;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "resistance_candle_medium", referencedColumnName = "id")
+    private Candle resistanceCandleMedium;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "support_candle_long", referencedColumnName = "id")
+    private Candle supportCandleLong;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "resistance_candle_long", referencedColumnName = "id")
+    private Candle resistanceCandleLong;
+
+    private Double takeProfitLong;
+    private Double takeProfitMedium;
 
     @Transient
     public Instant getCloseTime() {
@@ -69,7 +79,6 @@ public class Average {
             return close - avgMedium;
         }
         return null;
-
     }
 
     public Double getDistanceCloseAvgLong() {
@@ -87,65 +96,187 @@ public class Average {
     }
 
     public boolean isReadyForAnalyzing() {
-        // all fields are required not null
-        for (Field field : Average.class.getDeclaredFields()) {
-            try {
-                field.setAccessible(true);
-                if (field.get(this) == null) {
-                    return false;
-                }
-            } catch (IllegalAccessException e) {
-                return false;
-            }
+        return avgShort != null
+        && avgMedium != null
+        //&& avgLong != null
+        //&& distanceAvgShortAvgLong != null
+        //&& distanceAvgMediumAvgLong != null
+        && slopeAvgShort != null
+        && slopeAvgMedium != null;
+        //&& slopeAvgLong != null
+        ///&& slopeDistanceAvgShortAvgLong != null
+        //&& slopeDistanceAvgMediumAvgLong != null;
+    }
+
+    public boolean isAvgShortGoingUpAndBreakResistance() {
+        if(isBreakResistanceShort()) {
+            return isAvgShortGoingUp();
+        } else {
+            return false;
         }
-        return true;
     }
 
-    public boolean isShortAvgGoingUp() {
-        return slopeShortAvgShort != null
-                && slopeShortAvgShort > 0;
+    public boolean isAvgShortGoingDownAndBreakSupport() {
+        if (isBreakSupportShort()) {
+            return isAvgShortGoingDown();
+        } else {
+            return false;
+        }
     }
 
-    public boolean isShortAvgGoingDown() {
-        return slopeShortAvgShort != null
-                && slopeShortAvgShort < 0;
+    public boolean isBreakSupportShort() {
+        return supportCandleShort != null
+        && close < supportCandleShort.getClose()
+        && open > supportCandleShort.getClose();
     }
 
-    public boolean isShortAvgGoingUpAndBreakResistance() {
-        return slopeShortAvgShort != null
-                && resistanceAvgShort != null
-                && avgShort != null
-                && resistanceAvgShort != null
-                && slopeShortAvgShort > 0
-                && avgShort > resistanceAvgShort;
+    public boolean isBreakResistanceShort() {
+        return  resistanceCandleShort != null
+                && close > resistanceCandleShort.getClose()
+                && open < resistanceCandleShort.getClose();
     }
 
-    public boolean isShortAvgGoingDownAndBreakSupport() {
-        return slopeShortAvgShort != null
-                && supportAvgShort != null
-                && avgShort != null
-                && resistanceAvgShort != null
-                && slopeShortAvgShort < 0
-                && avgShort < supportAvgShort;
+    public boolean isBreakSupportMedium() {
+        return supportCandleMedium != null
+                && close < supportCandleMedium.getClose()
+                && open > supportCandleMedium.getClose();
     }
 
-    private boolean isAvgMediumGoingUp() {
+    public boolean isBreakResistanceMedium() {
+        return  resistanceCandleMedium != null
+                && close > resistanceCandleMedium.getClose()
+                && open < resistanceCandleMedium.getClose();
+    }
+
+    public boolean isBreakSupportLong() {
+        return supportCandleLong != null
+                && close < supportCandleLong.getClose()
+                && open > supportCandleLong.getClose();
+    }
+
+    public boolean isBreakResistanceLong() {
+        return  resistanceCandleLong != null
+                && close > resistanceCandleLong.getClose()
+                && open < resistanceCandleLong.getClose();
+    }
+
+    public boolean isAvgMediumGoingUpAndBreakResistance() {
         return slopeAvgMedium != null
-                && slopeShortAvgMedium > 0;
+                && resistanceCandleMedium != null
+                && avgMedium != null
+                && resistanceCandleMedium != null
+                && slopeAvgMedium > 0
+                && avgMedium > resistanceCandleMedium.getClose();
     }
 
-    private boolean isAvgMediumGoingDown() {
+    public boolean isMediumAvgGoingDownAndBreakSupport() {
         return slopeAvgMedium != null
-                && slopeAvgMedium < 0;
+                && supportCandleMedium != null
+                && avgMedium != null
+                && supportCandleMedium != null
+                && slopeAvgMedium < 0
+                && avgMedium < supportCandleMedium.getClose();
     }
 
-    private boolean isAvgLongGoingDown() {
+    public boolean isLongAvgGoingUpAndBreakResistance() {
         return slopeAvgLong != null
-                && slopeAvgLong < 0;
+                && resistanceCandleLong != null
+                && avgLong != null
+                && resistanceCandleLong != null
+                && slopeAvgLong > 0
+                && avgMedium > resistanceCandleLong.getClose();
     }
 
-    private boolean isAvgLongGoingUp() {
+    public boolean isLongAvgGoingDownAndBreakSupport() {
         return slopeAvgLong != null
-                && slopeAvgLong > 0;
+                && supportCandleLong != null
+                && avgLong != null
+                && supportCandleLong != null
+                && slopeAvgLong < 0
+                && avgLong < supportCandleLong.getClose();
     }
+
+
+    public boolean isAtBottom() {
+        return close != null
+                && avgLong != null
+                && getPip(close - avgLong) < -MAX_DISTANCE;
+    }
+
+    public boolean isAtTop() {
+        return close != null
+                && avgLong != null
+                && getPip(close - avgLong) > MAX_DISTANCE;
+    }
+
+    public Double getSupportCloseShort() {
+        return supportCandleShort == null ? null : supportCandleShort.getClose();
+    }
+    public Double getResistanceCloseShort() {
+        return resistanceCandleShort == null ? null : resistanceCandleShort.getClose();
+    }
+    public Double getSupportCloseMedium() {
+        return supportCandleMedium == null ? null : supportCandleMedium.getClose();
+    }
+    public Double getResistanceCloseMedium() {
+        return resistanceCandleMedium == null ? null : resistanceCandleMedium.getClose();
+    }
+    public Double getSupportCloseLong() {
+        return supportCandleLong == null ? null : supportCandleLong.getClose();
+    }
+    public Double getResistanceCloseLong() {
+        return resistanceCandleLong == null ? null : resistanceCandleLong.getClose();
+    }
+    public Instant getSupportTimeMedium() {
+        return supportCandleMedium == null ? null : supportCandleMedium.getTime();
+    }
+    public Instant getResistanceTimeMedium() {
+        return resistanceCandleMedium == null ? null : resistanceCandleMedium.getTime();
+    }
+    public Instant getSupportTimeLong() {
+        return supportCandleLong == null ? null : supportCandleLong.getTime();
+    }
+    public Instant getResistanceTimeLong() {
+        return resistanceCandleLong == null ? null : resistanceCandleLong.getTime();
+    }
+
+    public boolean isGoingUpFromAvgMedium() {
+        return close != null
+                && avgShort != null
+                && avgMedium != null
+                && getPip(close - avgMedium) > 0 && getPip(close - avgMedium) > 30;
+    }
+
+    public boolean isGoingDownFromAvgMedium() {
+        return close != null
+                && avgShort != null
+                && avgMedium != null
+                && getPip(close - avgMedium) < 0
+                && getPip(close - avgMedium) > -30;
+    }
+
+    public boolean isGoingUpFromAvgLong() {
+        return close != null
+                && avgShort != null
+                && avgLong != null
+                && getPip(close - avgLong) > 0
+                && getPip(close - avgLong) < 30;
+    }
+
+    public boolean isGoingDownFromAvgLong() {
+        return close != null
+                && avgShort != null
+                && avgLong != null
+                && getPip(close - avgLong) < 0
+                && getPip(close - avgLong) > -30;
+    }
+
+    public double getAbsDistanceCloseAvgLongPip() {
+        return Math.abs(getPip(getDistanceCloseAvgLong()));
+    }
+
+    public double getAbsDistanceAvgMediumAvgLongPip() {
+        return Math.abs(getPip(getDistanceAvgMediumAvgLong()));
+    }
+
 }

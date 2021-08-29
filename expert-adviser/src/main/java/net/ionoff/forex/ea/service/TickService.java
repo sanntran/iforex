@@ -37,9 +37,9 @@ public class TickService {
             candleRepository.save(lastCandle);
             candleEventNotifier.fireCandleEvent(new CandleClosedEvent(lastCandle));
             lastCandle = new Candle();
-            return Message.candleClosed();
+            return Message.ok();
         }
-        return Message.candleUpdated();
+        return Message.ok();
     }
 
     private Candle createNewCandle(Tick tick) {

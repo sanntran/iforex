@@ -19,23 +19,15 @@ public interface AverageRepository extends JpaRepository<Average, Long> {
             nativeQuery = true)
     Optional<Average> findLatest();
 
-    @Query(value = "SELECT * FROM averages ORDER BY candle DESC LIMIT :limit",
+    @Query(value = "SELECT * FROM averages ORDER BY id DESC LIMIT :limit",
             nativeQuery = true)
     List<Average> findLatest(@Param("limit") Integer limit);
-
-    @Query(value = "SELECT * FROM averages WHERE candle =:candleId",
-            nativeQuery = true)
-    List<Average> findByCandleId(@Param("candleId") List<Long> candleId);
-
-    @Query(value = "SELECT * FROM averages WHERE candle >=:fromCandleId ORDER BY candle DESC",
-            nativeQuery = true)
-    List<Average> findFromCandleId(@Param("fromCandleId")long fromCandleId);
 
     @Query(value = "SELECT * FROM averages WHERE time >=:time ORDER BY time",
             nativeQuery = true)
     List<Average> findAfterTime(@Param("time") Instant time);
 
-    @Query(value = "SELECT * FROM averages WHERE candle >=:fromCandleId AND candle <= :toCandleId ORDER BY candle DESC",
+    @Query(value = "SELECT * FROM averages WHERE candle >= :fromCandleId AND candle <= :toCandleId ORDER BY candle DESC",
             nativeQuery = true)
     List<Average> findFromCandleIdToCandleId(@Param("fromCandleId")long fromCandleId, @Param("toCandleId") long toCandleId);
 }

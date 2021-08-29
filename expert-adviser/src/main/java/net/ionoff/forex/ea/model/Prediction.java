@@ -14,15 +14,22 @@ import java.time.Instant;
 @NoArgsConstructor
 @javax.persistence.Entity
 @Table(name = "predictions")
-public class Prediction {
+public class Prediction implements Avg {
+    // the data is in future when predict
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long candle;
     private Instant time;
-    private Double close;
+    private Double pivot;
+    private Double avgShort;
+    private Double avgMedium;
+    private Double avgLong;
     private Double slopeAvgShort;
+    private Double slopeAvgMedium;
     private Double slopeAvgLong;
-    private Double predictedTime;
-    private Double predictedPrice;
+    private Double distanceAvgShortAvgLong;
+    private Double distanceAvgMediumAvgLong;
+    private Double slopeDistanceAvgShortAvgLong;
+    private Double slopeDistanceAvgMediumAvgLong;
+
 }

@@ -1,0 +1,12 @@
+package net.ionoff.forex.ea.model;
+
+public enum Event {
+    DOWN_FROM_TOP,
+    UP_FROM_BOTTOM,
+    UP_FROM_AVERAGE,
+    DOWN_FROM_AVERAGE,
+    CONFIRM_DOWN_FROM_TOP,
+    CONFIRM_UP_FROM_BOTTOM,
+    CONFIRM_UP_FROM_AVERAGE,
+    CONFIRM_DOWN_FROM_AVERAGE;
+}

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 
@@ -18,56 +20,72 @@ import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 @AllArgsConstructor
 public class AverageService {
 
-    private static final Integer CANDLE = 288;
-    private static final Integer AVERAGE = 288;
+    private static final Integer AVERAGE = Average.AVG_LONG_CANDLES;
 
-    private AverageRepository averageRepository;
     private CandleRepository candleRepository;
+    private AverageRepository averageRepository;
     private ExtremaService extremaService;
+    private TakeProfitService takeProfitService;
 
-    public void createAverage(Candle candle) {
-        Average newAvg = Average.builder()
-                .candle(candle.getId())
-                .time(candle.getTime())
-                .pivot(candle.getPivot())
-                .close(candle.getClose())
-                .build();
-        List<Candle> candles = candleRepository.findFromIdToId(candle.getId() - CANDLE + 1, candle.getId());
-        List<Average> averages = averageRepository.findFromCandleIdToCandleId(candle.getId() - AVERAGE + 1, candle.getId());
+    public void updateAverage(Average average,
+                              List<Average> averages) {
         try {
-            averages.add(0, newAvg);
-            calculateAvg(newAvg, candles);
-            calculateDistance(newAvg);
-            calculateSlopeAvg(newAvg, averages);
-            calculateSlopeSlopeAvg(newAvg, averages);
-            calculateSlopeDistance(newAvg, averages);
-
-            averageRepository.save(newAvg);
+            averages.add(0, average);
+            calculateAvg(average, averages);
+            calculateDistance(average);
+            calculateSlopeAvg(average, averages);
+            calculateSlopeDistance(average, averages);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    private void calculateExtrema(Average newAvg, List<Average> averages) throws Exception {
-        calculateExtrema(newAvg, averages, 6,"Short");
-        calculateExtrema(newAvg, averages, 24,"Medium");
-        calculateExtrema(newAvg, averages, 288, "Long");
+
+    public Optional<Average> findLatest() {
+        return averageRepository.findLatest();
     }
 
-    private void calculateExtrema(Average newAvg, List<Average> averages, int points, String period) throws Exception {
-        if (averages.size() >= points) {
-            extremaService.calculateSupportAndResistance(newAvg, averages, period);
+    public List<Average> createAverage(List<Candle> candles) {
+        Average newAvg = Average.builder()
+                .candle(candles.get(0))
+                .pivot(candles.stream().mapToDouble(Candle::getPivot).sum()/candles.size())
+                .time(candles.get(0).getTime())
+                .open(candles.get(candles.size() - 1).getOpen())
+                .close(candles.get(0).getClose())
+                .build();
+        List<Average> averages = averageRepository.findLatest(AVERAGE);
+        try {
+            updateAverage(newAvg, averages);
+            calculateExtrema(newAvg, averages);
+            calculateTakeProfit(newAvg, averages);
+            averageRepository.save(newAvg);
+            return averages;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
 
-    private void calculateAvg(Average newAvg, List<Candle> candles) throws Exception {
-        calculateAvg(newAvg, candles, 6,"Short");
-        calculateAvg(newAvg, candles, 24,"Medium");
-        calculateAvg(newAvg, candles, 288, "Long");
+    private void calculateTakeProfit(Average newAvg, List<Average> averages)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        takeProfitService.calculateTakeProfit(newAvg, "Medium");
+        takeProfitService.calculateTakeProfit(newAvg, "Long");
     }
 
-    private void calculateAvg(Average newAvg, List<Candle> candles, int points, String period) throws Exception {
-        if (candles.size() >= points) {
-            calculateAvg(newAvg, candles.subList(0, points), period);
+    private void calculateExtrema(Average newAvg, List<Average> averages) throws Exception {
+        extremaService.calculateSupportAndResistanceShort(newAvg, averages);
+        extremaService.calculateSupportAndResistanceMedium(newAvg, averages);
+        extremaService.calculateSupportAndResistanceLong(newAvg, averages);
+    }
+
+    private void calculateAvg(Average newAvg, List<Average> averages) throws Exception {
+        calculateAvg(newAvg, averages, Average.AVG_SHORT_CANDLES,"Short");
+        calculateAvg(newAvg, averages, Average.AVG_MEDIUM_CANDLES,"Medium");
+        calculateAvg(newAvg, averages, Average.AVG_LONG_CANDLES, "Long");
+    }
+
+    private void calculateAvg(Average newAvg, List<Average> averages, int points, String period) throws Exception {
+        if (averages.size() >= points) {
+            calculateAvg(newAvg, averages.subList(0, points), period);
         }
     }
 
@@ -81,26 +99,16 @@ public class AverageService {
     }
 
     private void calculateSlopeAvg(Average newAvg, List<Average> averages) throws Exception {
-        calculateSlope(newAvg, averages, 24, "AvgShort", "AvgShort");
-        calculateSlope(newAvg, averages, 6, "ShortAvgShort", "AvgShort");
-
-        calculateSlope(newAvg, averages, 48, "AvgMedium", "AvgMedium");
-        calculateSlope(newAvg, averages, 24, "ShortAvgMedium", "AvgMedium");
-
-        calculateSlope(newAvg, averages, 288, "AvgLong", "AvgLong");
-        calculateSlope(newAvg, averages, 48, "ShortAvgLong", "AvgLong");
-    }
-
-    private void calculateSlopeSlopeAvg(Average newAvg, List<Average> averages) throws Exception {
-        calculateSlope(newAvg, averages, 6, "SlopeAvgMedium", "SlopeAvgMedium");
+        calculateSlope(newAvg, averages, Average.SLOPE_AVG_SHORT_CANDLES, "AvgShort", "AvgShort");
+        calculateSlope(newAvg, averages, Average.SLOPE_AVG_MEDIUM_CANDLES, "AvgMedium", "AvgMedium");
+        calculateSlope(newAvg, averages, Average.SLOPE_AVG_LONG_CANDLES, "AvgLong", "AvgLong");
     }
 
     private void calculateSlopeDistance(Average newAvg, List<Average> averages) throws Exception {
-        calculateSlope(newAvg, averages, 6, "DistanceAvgShortAvgLong", "DistanceAvgShortAvgLong");
-        calculateSlope(newAvg, averages, 24, "DistanceAvgMediumAvgLong", "DistanceAvgMediumAvgLong");
-
-        calculateSlope(newAvg, averages, 6, "ShortDistanceAvgShortAvgLong", "DistanceAvgShortAvgLong");
-        calculateSlope(newAvg, averages, 24, "ShortDistanceAvgMediumAvgLong", "DistanceAvgMediumAvgLong");
+        calculateSlope(newAvg, averages, Average.SLOPE_DISTANCE_AVG_SHORT_AVG_LONG_CANDLES,
+                "DistanceAvgShortAvgLong", "DistanceAvgShortAvgLong");
+        calculateSlope(newAvg, averages, Average.SLOPE_DISTANCE_AVG_MEDIUM_AVG_LONG_CANDLES,
+                "DistanceAvgMediumAvgLong", "DistanceAvgMediumAvgLong");
     }
 
     private void calculateSlope(Average newAvg, List<Average> averages, int points, String period, String data) throws Exception {
@@ -109,12 +117,12 @@ public class AverageService {
         }
     }
     
-    private void calculateAvg(Average newAvg, List<Candle> candles, String period) throws Exception {
+    private void calculateAvg(Average newAvg, List<Average> averages, String period) throws Exception {
         Method setAvg = Average.class.getMethod(String.format("setAvg%s", period), Double.class);
-        double avg = candles
+        double avg = averages
                 .stream()
-                .mapToDouble(Candle::getPivot)
-                .sum() / candles.size();
+                .mapToDouble(Average::getPivot)
+                .sum() / averages.size();
         setAvg.invoke(newAvg, avg);
     }
 

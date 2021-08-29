@@ -1,20 +1,23 @@
 package net.ionoff.forex.ea.event;
 
 import lombok.AllArgsConstructor;
+import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
+import net.ionoff.forex.ea.repository.CandleRepository;
 import net.ionoff.forex.ea.service.AverageService;
-import net.ionoff.forex.ea.service.SupportService;
+import net.ionoff.forex.ea.service.PredictionService;
 import org.springframework.stereotype.Component;
 
-import java.util.Observable;
-import java.util.Observer;
+import java.time.Duration;
+import java.util.*;
 
 @Component
 @AllArgsConstructor
 public class CandleClosedHandler implements Observer {
 
+	private CandleRepository candleRepository;
 	private AverageService averageService;
-	private SupportService supportService;
+	private PredictionService predictionService;
 
 	@Override
 	public void update(Observable o, Object arg) {
@@ -26,6 +29,16 @@ public class CandleClosedHandler implements Observer {
 	}
 
 	private void onCandleClosed(Candle candle) {
-		averageService.createAverage(candle);
+		List<Candle> candles = candleRepository.findFromIdToId(candle.getId() - 12, candle.getId());
+		if (candles.size() < 12) {
+			return;
+		}
+		Optional<Average> lastAvg = averageService.findLatest();
+		if (!lastAvg.isPresent()
+				|| Duration.between(lastAvg.get().getTime(), candle.getTime())
+					.compareTo(Duration.ofMinutes(60)) >= 0) {
+			List<Average> averages = averageService.createAverage(candles);
+			predictionService.createPrediction(averages);
+		}
 	}
 }

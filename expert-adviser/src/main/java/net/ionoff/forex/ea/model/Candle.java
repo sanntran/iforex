@@ -34,6 +34,7 @@ public class Candle implements Entity {
 	private double open;
 	private double close;
 	private int volume;
+	private int minute;
 	private double pivot;
 
 	@Transient

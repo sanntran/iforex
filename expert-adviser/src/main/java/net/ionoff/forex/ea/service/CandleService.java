@@ -26,33 +26,41 @@ public class CandleService {
     private CandleEventNotifier candleEventNotifier;
 
     public Message createCandle(Candle candle) {
+        Optional<Candle> lastCandle = candleRepository.findLatest();
+        lastCandle.ifPresent(c -> candle.setTime(c.getTime().plus(Duration.ofMinutes(5))));
         candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
-        Optional<Candle> prevCandle = candleRepository.findLatest();
-        prevCandle.ifPresent(candle1 -> candle.setTime(candle1.getTime().plus(Duration.ofHours(1))));
         candleRepository.save(candle);
         candleEventNotifier.fireCandleEvent(new CandleClosedEvent(candle));
-        return Message.candleClosed();
+        return Message.ok();
     }
 
-    private void mergeCandle(Candle candle, Candle minute) {
+    private Candle newCandle(Instant time) {
+        Candle candle = new Candle();
+        candle.setTime(time);
+        candle.setMinute(0);
+        return candle;
+    }
+
+    private void mergeCandle(Candle candle, Candle m1) {
         if (candle.getVolume() == 0) {
-            candle.setTime(minute.getTime());
-            candle.setHigh(minute.getHigh());
-            candle.setLow(minute.getLow());
-            candle.setOpen(minute.getOpen());
-            candle.setClose(minute.getClose());
-            candle.setPivot((minute.getLow() + minute.getHigh())/2);
-            candle.setVolume(minute.getVolume());
+            candle.setMinute(5);
+            candle.setHigh(m1.getHigh());
+            candle.setLow(m1.getLow());
+            candle.setOpen(m1.getOpen());
+            candle.setClose(m1.getClose());
+            candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
+            candle.setVolume(m1.getVolume());
         } else {
-            candle.setVolume(candle.getVolume() + minute.getVolume());
-            if (minute.getHigh() > candle.getHigh()) {
-                candle.setHigh(minute.getHigh());
+            candle.setMinute(candle.getMinute() + 5);
+            candle.setVolume(candle.getVolume() + m1.getVolume());
+            if (m1.getHigh() > candle.getHigh()) {
+                candle.setHigh(m1.getHigh());
             }
-            if (minute.getLow() < candle.getLow()) {
-                candle.setLow(minute.getLow());
+            if (m1.getLow() < candle.getLow()) {
+                candle.setLow(m1.getLow());
             }
-            candle.setClose(minute.getClose());
-            candle.setPivot((candle.getLow() + candle.getHigh())/2);
+            candle.setClose(m1.getClose());
+            candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
         }
     }
 

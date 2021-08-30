@@ -27,14 +27,13 @@ public class Candle implements Entity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	@Column(name = "time")
 	private Instant time;
+	private Instant instant;
 	private double low;
 	private double high;
 	private double open;
 	private double close;
 	private int volume;
-	private int minute;
 	private double pivot;
 
 	@Transient

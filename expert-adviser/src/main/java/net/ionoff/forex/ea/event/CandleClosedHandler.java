@@ -29,6 +29,12 @@ public class CandleClosedHandler implements Observer {
 	}
 
 	private void onCandleClosed(Candle candle) {
+		List<Average> averages = averageService.createAverage(new ArrayList<>(Collections.singleton(candle)));
+		predictionService.createPrediction(averages);
+	}
+
+	/*
+	private void onCandleClosed(Candle candle) {
 		List<Candle> candles = candleRepository.findFromIdToId(candle.getId() - 12, candle.getId());
 		if (candles.size() < 12) {
 			return;
@@ -41,4 +47,5 @@ public class CandleClosedHandler implements Observer {
 			predictionService.createPrediction(averages);
 		}
 	}
+	*/
 }

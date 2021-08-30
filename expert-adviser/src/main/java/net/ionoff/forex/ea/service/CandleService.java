@@ -37,13 +37,11 @@ public class CandleService {
     private Candle newCandle(Instant time) {
         Candle candle = new Candle();
         candle.setTime(time);
-        candle.setMinute(0);
         return candle;
     }
 
     private void mergeCandle(Candle candle, Candle m1) {
         if (candle.getVolume() == 0) {
-            candle.setMinute(5);
             candle.setHigh(m1.getHigh());
             candle.setLow(m1.getLow());
             candle.setOpen(m1.getOpen());
@@ -51,7 +49,6 @@ public class CandleService {
             candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
             candle.setVolume(m1.getVolume());
         } else {
-            candle.setMinute(candle.getMinute() + 5);
             candle.setVolume(candle.getVolume() + m1.getVolume());
             if (m1.getHigh() > candle.getHigh()) {
                 candle.setHigh(m1.getHigh());

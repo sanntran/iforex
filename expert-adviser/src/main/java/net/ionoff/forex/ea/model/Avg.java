@@ -6,7 +6,7 @@ import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 
 public interface Avg {
 
-    int AVG_SHORT_CANDLES = 4;
+    int AVG_SHORT_CANDLES = 3;
     int AVG_MEDIUM_CANDLES = 12;
     int AVG_LONG_CANDLES = 48;
     int SLOPE_AVG_SHORT_CANDLES = 3;

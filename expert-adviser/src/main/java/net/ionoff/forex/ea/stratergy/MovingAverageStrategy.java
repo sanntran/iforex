@@ -41,20 +41,20 @@ public class MovingAverageStrategy extends AbstractStrategy {
         if (avg == null) {
             return Action.noOrder();
         }
-        if (prediction.isAvgShortGoingDownFast()
-            && prediction.isAvgMediumGoingDown()
-            && prediction.getAvgShort() < avg.getAvgMedium()
-                && isCloseToAvgLong(candle, prediction)
+        if (prediction.isAvgMediumGoingUp()
+                && avg.getAvgShort() < avg.getAvgMedium()
+                && prediction.getAvgShort() > avg.getAvgMedium()
+                && candle.getLow() < avg.getAvgMedium()
         ) {
             System.out.println("OPEN ORDER SELL");
-            return openOrderSell(avg);
-        } else if (
-            prediction.isAvgShortGoingUpFast()
-            && prediction.isAvgMediumGoingUp()
-            && prediction.getAvgShort() > avg.getAvgMedium()
-            && isCloseToAvgLong(candle, prediction)) {
-            System.out.println("OPEN ORDER BUY");
             return openOrderBuy(avg);
+        } else if (prediction.isAvgMediumGoingDown()
+                && avg.getAvgShort() > avg.getAvgMedium()
+                && prediction.getAvgShort() < avg.getAvgMedium()
+                && candle.getHigh() > avg.getAvgMedium()
+        ) {
+            System.out.println("OPEN ORDER BUY");
+            return openOrderSell(avg);
         }
         return Action.noOrder();
     }
@@ -107,12 +107,18 @@ public class MovingAverageStrategy extends AbstractStrategy {
         if (prediction == null) {
             return Action.noOrder();
         }
+        Average avg = getAvgReadyForAnalyzing();
+        if (avg == null) {
+            return Action.noOrder();
+        }
         if (order.isBuy()) {
-            if (prediction.getAvgShort() < prediction.getAvgMedium()) {
+            if (avg.getAvgShort() > avg.getAvgMedium()
+                    && prediction.getAvgShort() < avg.getAvgMedium()) {
                 return closeOrderBuy(order, candle);
             }
         } else if (order.isSell()) {
-            if (prediction.getAvgShort() > prediction.getAvgMedium()) {
+            if (avg.getAvgShort() < avg.getAvgMedium()
+                    && prediction.getAvgShort() > avg.getAvgMedium()) {
                 return closeOrderSell(order, candle);
             }
         }

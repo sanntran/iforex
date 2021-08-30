@@ -1,5 +1,6 @@
 package net.ionoff.forex.ea.repository;
 
+import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -53,4 +54,11 @@ public interface CandleRepository extends JpaRepository<Candle, Long> {
             nativeQuery = true)
     List<Candle> findFromIdToId(@Param("fromId") long fromId, @Param("toId") long toId);
 
+    @Query(value = "SELECT * FROM candles WHERE period = :period ORDER BY id DESC LIMIT :limit",
+            nativeQuery = true)
+    List<Candle> findLatest(@Param("period") Candle.Period period, @Param("limit") Integer limit);
+
+    @Query(value = "SELECT * FROM candles WHERE period = :period AND id = (SELECT MAX(id) FROM candles)",
+            nativeQuery = true)
+    Optional<Candle> findLatest(@Param("period") Candle.Period period);
 }

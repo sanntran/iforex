@@ -19,9 +19,9 @@ public interface AverageRepository extends JpaRepository<Average, Long> {
             nativeQuery = true)
     Optional<Average> findLatest();
 
-    @Query(value = "SELECT * FROM averages ORDER BY id DESC LIMIT :limit",
+    @Query(value = "SELECT * FROM averages WHERE period=:period ORDER BY id DESC LIMIT :limit",
             nativeQuery = true)
-    List<Average> findLatest(@Param("limit") Integer limit);
+    List<Average> findLatest(@Param("period") Average.Period period, @Param("limit") Integer limit);
 
     @Query(value = "SELECT * FROM averages WHERE time >=:time ORDER BY time",
             nativeQuery = true)

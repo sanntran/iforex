@@ -5,18 +5,20 @@ import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
 import net.ionoff.forex.ea.repository.CandleRepository;
 import net.ionoff.forex.ea.service.AverageService;
+import net.ionoff.forex.ea.service.ExtremaService;
 import net.ionoff.forex.ea.service.PredictionService;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.util.*;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
 public class CandleClosedHandler implements Observer {
 
-	private CandleRepository candleRepository;
 	private AverageService averageService;
+	private ExtremaService extremaService;
 	private PredictionService predictionService;
 
 	@Override
@@ -29,23 +31,8 @@ public class CandleClosedHandler implements Observer {
 	}
 
 	private void onCandleClosed(Candle candle) {
-		List<Average> averages = averageService.createAverage(new ArrayList<>(Collections.singleton(candle)));
-		predictionService.createPrediction(averages);
+		Optional<Average> average = averageService.createAverage(candle);
+		average.ifPresent(avg -> extremaService.createSupportAndResistance(avg));
+		average.ifPresent(avg -> predictionService.createPrediction(avg));
 	}
-
-	/*
-	private void onCandleClosed(Candle candle) {
-		List<Candle> candles = candleRepository.findFromIdToId(candle.getId() - 12, candle.getId());
-		if (candles.size() < 12) {
-			return;
-		}
-		Optional<Average> lastAvg = averageService.findLatest();
-		if (!lastAvg.isPresent()
-				|| Duration.between(lastAvg.get().getTime(), candle.getTime())
-					.compareTo(Duration.ofMinutes(60)) >= 0) {
-			List<Average> averages = averageService.createAverage(candles);
-			predictionService.createPrediction(averages);
-		}
-	}
-	*/
 }

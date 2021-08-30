@@ -1,10 +1,6 @@
 package net.ionoff.forex.ea.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import net.ionoff.forex.ea.constant.Period;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -24,9 +20,41 @@ public class Candle implements Entity {
 	public static final DateTimeFormatter MT4_CSV_DATE_FORMAT = DateTimeFormatter
 			.ofPattern("yyyy.MM.dd,HH:mm")
 			.withZone(ZoneOffset.UTC);
+
+	@Getter
+	public enum Period {
+		SHORT("CANDLE", 1),
+		MEDIUM("CANDLE", 12),
+		LONG("CANDLE", 48);
+		private final String type;
+		private final int size;
+		Period(String type, int size) {
+			this.type = type;
+			this.size = size;
+		}
+
+		public boolean isMinuteBased() {
+			return "MINUTE".equals(type);
+		}
+
+		public boolean isVolumeBased() {
+			return "VOLUME".equals(type);
+		}
+
+		public boolean isHeightBased() {
+			return "HEIGHT".equals(type);
+		}
+
+		public boolean isCandleBased() {
+			return "CANDLE".equals(type);
+		}
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	@Enumerated(value = EnumType.STRING)
+	private Period period;
 	private Instant time;
 	private Instant instant;
 	private double low;
@@ -35,10 +63,8 @@ public class Candle implements Entity {
 	private double close;
 	private int volume;
 	private double pivot;
+	private Integer size;
 
-	@Transient
-	private Period period;
-	
 	public double getUpperShadow() {
 		if (isBull()) {
 			return high - close;
@@ -69,7 +95,7 @@ public class Candle implements Entity {
 		return Math.abs(close - open);
 	}
 
-	public double getHeight() {
+	public int getHeight() {
 		return new BigDecimal((high - low) * 100000).intValue();
 	}
 
@@ -101,5 +127,11 @@ public class Candle implements Entity {
 	@Override
 	public int hashCode() {
 		return Objects.hash(time);
+	}
+
+
+	@Transient
+	public boolean isClosed() {
+		return size != null && size >= period.getSize();
 	}
 }

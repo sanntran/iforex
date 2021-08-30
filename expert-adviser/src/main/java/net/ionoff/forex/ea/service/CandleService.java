@@ -8,15 +8,7 @@ import net.ionoff.forex.ea.model.Message;
 import net.ionoff.forex.ea.repository.CandleRepository;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -26,55 +18,58 @@ public class CandleService {
     private CandleEventNotifier candleEventNotifier;
 
     public Message createCandle(Candle candle) {
-        Optional<Candle> lastCandle = candleRepository.findLatest();
-        lastCandle.ifPresent(c -> candle.setTime(c.getTime().plus(Duration.ofMinutes(5))));
-        candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
-        candleRepository.save(candle);
-        candleEventNotifier.fireCandleEvent(new CandleClosedEvent(candle));
+        updateLatestCandle(candle, Candle.Period.SHORT);
+        updateLatestCandle(candle, Candle.Period.MEDIUM);
+        updateLatestCandle(candle, Candle.Period.LONG);
         return Message.ok();
     }
 
-    private Candle newCandle(Instant time) {
+    private void updateLatestCandle(Candle candle, Candle.Period period) {
+        Candle lastCandle = candleRepository.findLatest(period)
+                .orElse(newCandle(candle.getTime(), period));
+        if (!lastCandle.isClosed()) {
+            mergeCandle(lastCandle, candle);
+            candleRepository.save(candle);
+        }
+        if (lastCandle.isClosed()) {
+            candleEventNotifier.fireCandleEvent(new CandleClosedEvent(lastCandle));
+        }
+    }
+
+    private Candle newCandle(Instant time, Candle.Period period) {
         Candle candle = new Candle();
+        candle.setSize(0);
         candle.setTime(time);
+        candle.setInstant(time);
+        candle.setPeriod(period);
         return candle;
     }
 
-    private void mergeCandle(Candle candle, Candle m1) {
-        if (candle.getVolume() == 0) {
-            candle.setHigh(m1.getHigh());
-            candle.setLow(m1.getLow());
-            candle.setOpen(m1.getOpen());
-            candle.setClose(m1.getClose());
-            candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
-            candle.setVolume(m1.getVolume());
+    private void mergeCandle(Candle latestCandle, Candle newCandle) {
+        if (latestCandle.getVolume() == 0) {
+            latestCandle.setHigh(newCandle.getHigh());
+            latestCandle.setLow(newCandle.getLow());
+            latestCandle.setOpen(newCandle.getOpen());
+            latestCandle.setClose(newCandle.getClose());
+            latestCandle.setPivot((latestCandle.getOpen() + latestCandle.getLow() + latestCandle.getHigh())/3);
+            latestCandle.setVolume(newCandle.getVolume());
         } else {
-            candle.setVolume(candle.getVolume() + m1.getVolume());
-            if (m1.getHigh() > candle.getHigh()) {
-                candle.setHigh(m1.getHigh());
+            latestCandle.setVolume(latestCandle.getVolume() + newCandle.getVolume());
+            if (newCandle.getHigh() > latestCandle.getHigh()) {
+                latestCandle.setHigh(newCandle.getHigh());
             }
-            if (m1.getLow() < candle.getLow()) {
-                candle.setLow(m1.getLow());
+            if (newCandle.getLow() < latestCandle.getLow()) {
+                latestCandle.setLow(newCandle.getLow());
             }
-            candle.setClose(m1.getClose());
-            candle.setPivot((candle.getOpen() + candle.getLow() + candle.getHigh())/3);
+            latestCandle.setClose(newCandle.getClose());
+            latestCandle.setPivot((latestCandle.getOpen() + latestCandle.getLow() + latestCandle.getHigh())/3);
         }
-    }
-
-    public void exportCandles() throws IOException {
-        String csvFile = "F:\\Projects\\forex\\candles.csv";
-        File fout = new File(csvFile);
-        FileOutputStream fos = new FileOutputStream(fout);
-        OutputStreamWriter osw = new OutputStreamWriter(fos);
-        for (long i = 1; i < 20000; i++) {
-            Candle candle = candleRepository.getOne(i);
-            osw.write(candle.toMt4CsvLine());
+        if (latestCandle.getPeriod().isCandleBased()) {
+            newCandle.setSize(newCandle.getSize() + 1);
+        } else if (latestCandle.getPeriod().isVolumeBased()) {
+            newCandle.setSize(newCandle.getSize() + newCandle.getVolume());
+        } else if (latestCandle.getPeriod().isHeightBased()) {
+            newCandle.setSize(newCandle.getHeight());
         }
-        osw.close();
-    }
-
-    private static Instant toInstant(String tickTime) {
-        String dateTime = String.format("%s +0000", tickTime.substring(0, tickTime.lastIndexOf(":")));
-        return OffsetDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss Z")).toInstant();
     }
 }

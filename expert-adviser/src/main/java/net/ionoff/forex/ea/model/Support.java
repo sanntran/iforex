@@ -18,7 +18,14 @@ import java.time.Instant;
 public class Support {
 
     public enum Period {
-        SHORT, MEDIUM, LONG
+        SHORT(0.00236), MEDIUM(0.00236), LONG(0.00118);
+        private final double slope;
+        Period(double slope) {
+            this.slope = slope;
+        }
+        public double getSlope() {
+            return slope;
+        }
     }
 
     @Id
@@ -28,6 +35,7 @@ public class Support {
     @JoinColumn(name = "candle", referencedColumnName = "id")
     private Candle candle;
     private Instant time;
-    private String period;
+    @Enumerated(value = EnumType.STRING)
+    private Period period;
     private double close;
 }

@@ -7,17 +7,24 @@ truncate table forex.predictions;
 truncate table forex.results;
 truncate table forex.ticks;
 
-select * from forex.candles;
+select * from forex.averages;
 select avg(high-low) from forex.candles;
 
 select * from forex.predictions limit 100;
 
-ALTER TABLE `forex`.`predictions` 
-ADD COLUMN `distance_avg_short_avg_long` double DEFAULT NULL,
- ADD COLUMN  `distance_avg_medium_avg_long` double DEFAULT NULL,
- ADD COLUMN  `slope_avg_short` double DEFAULT NULL,
- ADD COLUMN  `slope_avg_medium` double DEFAULT NULL,
-ADD COLUMN  `slope_avg_long` double DEFAULT NULL,
-ADD COLUMN   `slope_distance_avg_short_avg_long` double DEFAULT NULL,
-ADD COLUMN  `slope_distance_avg_medium_avg_long` double DEFAULT NULL
-;
+select * from forex.orders;
+
+CREATE TABLE `predictions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `candle` bigint(20) NOT NULL,
+  `time` timestamp NULL DEFAULT NULL,
+  `open` double DEFAULT NULL,
+  `close` double DEFAULT NULL,
+  `average` double DEFAULT NULL,
+  `distance` double DEFAULT NULL,
+  `slope` double DEFAULT NULL,
+  `slope_distance` double DEFAULT NULL,
+  `slope_slope` double DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `predictions_time_idx` (`time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;

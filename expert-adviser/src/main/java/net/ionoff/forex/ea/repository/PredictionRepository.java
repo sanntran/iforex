@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
-    @Query(value = "SELECT * FROM predictions ORDER BY id DESC LIMIT :limit",
+    @Query(value = "SELECT * FROM predictions WHERE period=:period ORDER BY id DESC LIMIT :limit",
             nativeQuery = true)
-    List<Prediction> findLatest(@Param("limit") Integer limit);
+    List<Prediction> findLatest(@Param("period") Prediction.Period period, @Param("limit") Integer limit);
 
 }

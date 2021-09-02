@@ -24,51 +24,53 @@ public class ExtremaService {
 
     private CandleRepository candleRepository;
     private SupportRepository supportRepository;
+    private AverageRepository averageRepository;
     private ResistanceRepository resistanceRepository;
 
     public void createSupportAndResistance(Average newAvg) {
         if (newAvg.getClose() == null || newAvg.getSlope() == null) {
             return;
         }
-        Support.Period supportPeriod = Support.Period.valueOf(newAvg.getPeriod().name());
-
-        Support support = supportRepository.findLatest(supportPeriod).orElseGet(()-> {
-            Candle lowestCandle = candleRepository.findLowest(0L, newAvg.getCandle().getId());
-            return createSupport(lowestCandle, Support.Period.SHORT);
+        final String candlePeriod = Candle.Period.SHORT.name();
+        final Support.Period supportPeriod = Support.Period.valueOf(newAvg.getPeriod().name());
+        final Resistance.Period resistancePeriod = Resistance.Period.valueOf(newAvg.getPeriod().name());
+        final Support currentSupport = supportRepository.findLatest(supportPeriod.name()).orElseGet(()-> {
+            Candle lowestCandle = candleRepository.findLowest(candlePeriod, 0L, newAvg.getCandle().getId());
+            return createSupport(lowestCandle, supportPeriod);
         });
-        Resistance.Period resistancePeriod = Resistance.Period.valueOf(newAvg.getPeriod().name());
-
-        Resistance resistance = resistanceRepository.findLatest(resistancePeriod).orElseGet(()-> {
-            Candle highestCandle = candleRepository.findHighest(0L, newAvg.getCandle().getId());
-            return createResistance(highestCandle, Resistance.Period.SHORT);
+        final Resistance currentResistance = resistanceRepository.findLatest(resistancePeriod.name()).orElseGet(()-> {
+            Candle highestCandle = candleRepository.findHighest(candlePeriod, 0L, newAvg.getCandle().getId());
+            return createResistance(highestCandle, resistancePeriod);
         });
-        newAvg.setResistance(resistance.getCandle());
-        newAvg.setSupport(support.getCandle());
+        newAvg.setResistance(currentResistance.getCandle());
+        newAvg.setSupport(currentSupport.getCandle());
 
-        if (getPip(newAvg.getSlope()) >= supportPeriod.getSlope()) {
+        if (hasNewSupport(supportPeriod, newAvg)
+                && currentSupport.getTime().isBefore(currentResistance.getTime())) {
             // go backward to the resistance and find the lowest candle, it's support
-            Support newSupport = support;
-            if (newSupport.getTime().isAfter(resistance.getTime())) {
-                newAvg.setSupport(newSupport.getCandle());
-                return; // already have support
-            } else {
-                Long resistanceCandle = resistance.getCandle().getId();
-                Candle lowestCandle = candleRepository.findLowest(resistanceCandle, newAvg.getCandle().getId());
-                newSupport = createSupport(lowestCandle, Support.Period.SHORT);
-                newAvg.setSupport(newSupport.getCandle());
-            }
-        } else if (getPip(newAvg.getSlope()) <= resistancePeriod.getSlope()) {
-            Resistance newResistance = resistance;
-            if (resistance.getTime().isAfter(support.getTime())) {
-                newAvg.setResistance(newResistance.getCandle());
-                return; // already have resistance
-            } else {
-                Long supportCandle = support.getCandle().getId();
-                Candle highestCandle = candleRepository.findHighest(supportCandle, newAvg.getCandle().getId());
-                newResistance = createResistance(highestCandle, Resistance.Period.SHORT);
-                newAvg.setResistance(newResistance.getCandle());
-            }
+            Long resistanceCandle = currentResistance.getCandle().getId();
+            Candle lowestCandle = candleRepository.findLowest(candlePeriod, resistanceCandle, newAvg.getCandle().getId());
+            Support newSupport = createSupport(lowestCandle, supportPeriod);
+            newAvg.setSupport(newSupport.getCandle());
+        } else if (hasNewResistance(resistancePeriod, newAvg)
+            && currentResistance.getTime().isBefore(currentSupport.getTime())) {
+            // go backward to the support and find the highest candle, it's support
+            Long supportCandle = currentSupport.getCandle().getId();
+            Candle highestCandle = candleRepository.findHighest(candlePeriod, supportCandle, newAvg.getCandle().getId());
+            Resistance newResistance = createResistance(highestCandle, resistancePeriod);
+            newAvg.setResistance(newResistance.getCandle());
         }
+        averageRepository.save(newAvg);
+    }
+
+    private boolean hasNewSupport(Support.Period period, Average newAvg) {
+        return newAvg.getSlope() != null
+                && getPip(newAvg.getSlope()) >= period.getSlope();
+    }
+
+    private boolean hasNewResistance(Resistance.Period period, Average newAvg) {
+        return newAvg.getSlope() != null
+                && getPip(newAvg.getSlope()) <= period.getSlope();
     }
 
     private Support createSupport(Candle candle, Support.Period period) {

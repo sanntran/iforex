@@ -42,7 +42,7 @@ public class StrategyService {
             Action action = order != null && order.isOpen()
                     ? movingAverageStrategy.getAction(order, candle)
                     : movingAverageStrategy.getAction(candle);
-            if (Action.Code.CLOSE_ORDER.getValue() == action.getCode()) {
+            if (Action.Code.CLOSE.getValue() == action.getCode()) {
                 Order orderToClose = action.getOrder();
                 orderToClose.setProfit(orderToClose.isBuy()
                         ? getPip(orderToClose.getClosePrice() - orderToClose.getOpenPrice())
@@ -58,7 +58,7 @@ public class StrategyService {
                                 .profit(orderToClose.getProfit())
                                 .orderId(orderToClose.getId())
                                 .build());
-            } else if (Action.Code.OPEN_ORDER.getValue() == action.getCode()) {
+            } else if (Action.Code.OPEN.getValue() == action.getCode()) {
                 Order orderToOpen = action.getOrder();
                 orderRepository.save(orderToOpen);
                 resultRepository.save(

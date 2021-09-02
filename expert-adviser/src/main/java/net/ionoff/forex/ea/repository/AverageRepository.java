@@ -15,19 +15,15 @@ import java.util.Optional;
 @Repository
 public interface AverageRepository extends JpaRepository<Average, Long> {
 
-    @Query(value = "SELECT * FROM averages WHERE id =(SELECT MAX(id) FROM averages)",
+    @Query(value = "SELECT * FROM averages WHERE period=:period ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
-    Optional<Average> findLatest();
+    Optional<Average> findLatest(@Param("period") String period);
 
     @Query(value = "SELECT * FROM averages WHERE period=:period ORDER BY id DESC LIMIT :limit",
             nativeQuery = true)
-    List<Average> findLatest(@Param("period") Average.Period period, @Param("limit") Integer limit);
+    List<Average> findLatest(@Param("period") String period, @Param("limit") Integer limit);
 
-    @Query(value = "SELECT * FROM averages WHERE time >=:time ORDER BY time",
+    @Query(value = "SELECT * FROM averages WHERE period=:period ORDER BY id DESC LIMIT 1 OFFSET 1",
             nativeQuery = true)
-    List<Average> findAfterTime(@Param("time") Instant time);
-
-    @Query(value = "SELECT * FROM averages WHERE candle >= :fromCandleId AND candle <= :toCandleId ORDER BY candle DESC",
-            nativeQuery = true)
-    List<Average> findFromCandleIdToCandleId(@Param("fromCandleId")long fromCandleId, @Param("toCandleId") long toCandleId);
+    Optional<Average> findPrevious(@Param("period") String period);
 }

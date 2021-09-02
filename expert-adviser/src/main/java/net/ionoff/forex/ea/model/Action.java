@@ -11,11 +11,10 @@ import lombok.*;
 public class Action {
 
 	public enum Code {
-		NO_ORDER(0),
-		OPEN_ORDER(1),
-		CLOSE_ORDER(2),
-		MODIFY_ORDER(3),
-		CLOSE_AND_OPEN_ORDER(4);
+		NONE(0),
+		OPEN(1),
+		CLOSE(2),
+		MODIFY(3);
 
 		private int value;
 		Code(int value) {
@@ -29,43 +28,39 @@ public class Action {
 	private int code;
 	private Order order;
 
-	public static Action noOrder() {
-		return Action.builder().code(Code.NO_ORDER.value).build();
+	public static Action none() {
+		return Action.builder().code(Code.NONE.value).build();
 	}
 
-	public static Action openOrder(Order order)  {
+	public static Action open(Order order)  {
 		return Action.builder()
-				.code(Code.OPEN_ORDER.value)
+				.code(Code.OPEN.value)
 				.order(order).build();
 	}
-	public static Action closeOrder(Order order) {
+
+	public static Action close(Order order) {
 		return Action.builder()
-				.code(Code.CLOSE_ORDER.value)
+				.code(Code.CLOSE.value)
 				.order(order).build();
 	}
-	public static Action modifyOrder(Order order) {
+	public static Action modify(Order order) {
 		return Action.builder()
-				.code(Code.MODIFY_ORDER.value)
-				.order(order).build();
-	}
-	public static Action closeAndOpenOrder(Order order) {
-		return Action.builder()
-				.code(Code.CLOSE_AND_OPEN_ORDER.value)
+				.code(Code.MODIFY.value)
 				.order(order).build();
 	}
 
 	@JsonIgnore
-	public boolean isNoOrder() {
-		return Code.NO_ORDER.value == code;
+	public boolean isNone() {
+		return Code.NONE.value == code;
 	}
 
 	@JsonIgnore
-	public boolean isCloseOrder() {
-		return Code.CLOSE_ORDER.value == code;
+	public boolean isClose() {
+		return Code.CLOSE.value == code;
 	}
 
 	@JsonIgnore
-	public boolean isOpenOrder() {
-		return Code.OPEN_ORDER.value == code;
+	public boolean isOpen() {
+		return Code.OPEN.value == code;
 	}
 }

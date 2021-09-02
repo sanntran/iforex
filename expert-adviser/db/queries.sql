@@ -7,10 +7,24 @@ truncate table forex.predictions;
 truncate table forex.results;
 truncate table forex.ticks;
 
-select * from forex.averages;
+select * from forex.predictions;
+select * from forex.predictions where period='SHORT';
+select * from forex.predictions where period='MEDIUM';
+select * from forex.predictions where period='LONG';
+
+select * from forex.averages where period='SHORT';
+select * from forex.averages where period='MEDIUM';
+select * from forex.averages where period='LONG';
+
+select * from forex.candles where period='SHORT';
+SELECT * FROM forex.candles WHERE period='MEDIUM';
+SELECT * FROM forex.candles WHERE period='LONG';
+
 select avg(high-low) from forex.candles;
 
 select * from forex.predictions limit 100;
+select * from forex.supports order by id desc;
+select * from forex.resistances order by id desc;
 
 select * from forex.orders;
 

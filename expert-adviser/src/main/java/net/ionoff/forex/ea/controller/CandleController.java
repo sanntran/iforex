@@ -3,15 +3,12 @@ package net.ionoff.forex.ea.controller;
 import net.ionoff.forex.ea.exception.MethodNotSupportedException;
 import net.ionoff.forex.ea.model.Candle;
 import net.ionoff.forex.ea.model.Message;
-import net.ionoff.forex.ea.model.Tick;
 import net.ionoff.forex.ea.service.CandleService;
 import net.ionoff.forex.ea.service.TickService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
@@ -35,7 +32,6 @@ public class CandleController {
                                 @RequestParam(name = "low") Double low,
                                 @RequestParam(name = "volume") Integer volume
     ) {
-        //System.out.println(time);
         if (HttpMethod.POST.name().equals(method)) {
             Candle candle = Candle.builder()
                     .time(toInstant(time))
@@ -50,23 +46,7 @@ public class CandleController {
         throw new MethodNotSupportedException(method);
     }
 
-
     private static Instant toInstant(String time) {
         return OffsetDateTime.parse(time).toInstant();
     }
-
-    @RequestMapping(value = "/import", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String importTick(HttpServletRequest request) {
-        tickService.importTicks();
-        return "hihi";
-    }
-
-    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String exportCandles(HttpServletRequest request) throws IOException {
-        candleService.exportCandles();
-        return "hihi";
-    }
-
 }

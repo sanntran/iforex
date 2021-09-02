@@ -1,6 +1,7 @@
 package net.ionoff.forex.ea.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
 import net.ionoff.forex.ea.model.Prediction;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class PredictionService {
@@ -27,33 +29,39 @@ public class PredictionService {
     private PredictionRepository predictionRepository;
 
     public void createPrediction(Average average) {
-        Prediction.Period period = Prediction.Period.valueOf(average.getPeriod().name());
+        try {
+            Prediction.Period period = Prediction.Period.valueOf(average.getPeriod().name());
+            createPrediction(average, period);
+        } catch (Exception e) {
+            log.error("Error when create prediction. {}", e.getMessage(), e);
+        }
+    }
+
+    public void createPrediction(Average average, Prediction.Period period) {
         Instant future = average.getTime().plus(period.getDuration());
         List<Average> averages = new ArrayList<>(
-                averageRepository.findLatest(average.getPeriod(), period.getAvgPoints() - 1));
+                averageRepository.findLatest(period.name(), period.getAvgPoints() - 1));
         if (averages.size() < period.getAvgPoints() - 1) {
             return;
         }
-        try {
-            Average nextAvg = Average.builder()
-                    .time(future)
-                    .pivot(predictPivot(averages, future))
-                    .build();
-            averages.add(nextAvg);
-            nextAvg.setAverage(calculateAvg(averages));
+        Average nextAvg = Average.builder()
+                .time(future)
+                .pivot(predictPivot(averages, future))
+                .build();
+        averages.add(nextAvg);
+        nextAvg.setAverage(calculateAvg(averages));
+        nextAvg.setSlope(calculateSlope(averages.subList(0, period.getSlopePoints())));
 
-            Prediction newPrediction = Prediction.builder()
-                    .time(future)
-                    .pivot(nextAvg.getPivot())
-                    .average(nextAvg.getAverage())
-                    .slope(calculateSlope(averages))
-                    .slopeSlope(calculateSlopeSlope(averages))
-                    .build();
+        Prediction newPrediction = Prediction.builder()
+                .time(average.getTime())
+                .period(period)
+                .pivot(nextAvg.getPivot())
+                .average(nextAvg.getAverage())
+                .slope(nextAvg.getSlope())
+                .slopeSlope(calculateSlopeSlope(averages.subList(0, period.getSlopeSlopePoints())))
+                .build();
 
-            predictionRepository.save(newPrediction);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        predictionRepository.save(newPrediction);
     }
 
     private Double predictPivot(List<Average> averages, Instant future) {

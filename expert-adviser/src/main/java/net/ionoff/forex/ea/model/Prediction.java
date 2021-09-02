@@ -13,11 +13,12 @@ import java.time.Instant;
 @javax.persistence.Entity
 @Table(name = "predictions")
 public class Prediction {
+
     @Getter
     public enum Period {
-        SHORT(12, 6, 3, Duration.ofMinutes(5)),
-        MEDIUM(24, 6, 3, Duration.ofMinutes(60)),
-        LONG(36, 6, 3, Duration.ofMinutes(240));
+        SHORT(8, 4, 3, Duration.ofMinutes(5)),
+        MEDIUM(14, 7, 4, Duration.ofMinutes(50)),
+        LONG(20, 10, 5, Duration.ofMinutes(100));
         private final int avgPoints;
         private final int slopePoints;
         private final int slopeSlopePoints;
@@ -34,7 +35,7 @@ public class Prediction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Enumerated(value = EnumType.STRING)
-    private Average.Period period;
+    private Period period;
     private Instant time;
     private Double pivot;
     private Double average;
@@ -42,4 +43,13 @@ public class Prediction {
     private Double distance;
     private Double slopeSlope;
     private Double slopeDistance;
+
+    @Transient
+    public boolean isReady() {
+        return pivot != null
+            && average != null
+            && slope != null
+            && distance != null
+            && slopeSlope != null;
+    }
 }

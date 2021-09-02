@@ -1,0 +1,5 @@
+isPredictShortAvgGoingDown:
+  isShortAvgGoingDown:
+    isGoingUp: sell
+    isGoinDown:
+      isAvgLongGoingUp: sell

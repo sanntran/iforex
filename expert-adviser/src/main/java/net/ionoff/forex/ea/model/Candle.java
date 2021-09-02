@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -17,20 +18,19 @@ import java.util.Objects;
 @Table(name = "candles")
 public class Candle implements Entity {
 	private static final long serialVersionUID = 1L;
-	public static final DateTimeFormatter MT4_CSV_DATE_FORMAT = DateTimeFormatter
-			.ofPattern("yyyy.MM.dd,HH:mm")
-			.withZone(ZoneOffset.UTC);
 
 	@Getter
 	public enum Period {
-		SHORT("CANDLE", 1),
-		MEDIUM("CANDLE", 12),
-		LONG("CANDLE", 48);
+		SHORT("CANDLE", 1, Duration.ofMinutes(5)),
+		MEDIUM("CANDLE", 10, Duration.ofMinutes(50)),
+		LONG("CANDLE", 20, Duration.ofMinutes(100));
 		private final String type;
 		private final int size;
-		Period(String type, int size) {
+		private final Duration duration;
+		Period(String type, int size, Duration duration) {
 			this.type = type;
 			this.size = size;
+			this.duration = duration;
 		}
 
 		public boolean isMinuteBased() {
@@ -56,7 +56,6 @@ public class Candle implements Entity {
 	@Enumerated(value = EnumType.STRING)
 	private Period period;
 	private Instant time;
-	private Instant instant;
 	private double low;
 	private double high;
 	private double open;
@@ -64,6 +63,8 @@ public class Candle implements Entity {
 	private int volume;
 	private double pivot;
 	private Integer size;
+	private Instant opened;
+	private Instant closed;
 
 	public double getUpperShadow() {
 		if (isBull()) {
@@ -97,23 +98,6 @@ public class Candle implements Entity {
 
 	public int getHeight() {
 		return new BigDecimal((high - low) * 100000).intValue();
-	}
-
-	@Transient
-	public Instant getCloseTime() {
-		return time.plusSeconds(60); // period 1 minute
-	}
-
-	public String toMt4CsvLine() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(MT4_CSV_DATE_FORMAT.format(time))
-				.append(",").append(open)
-				.append(",").append(high)
-				.append(",").append(low)
-				.append(",").append(close)
-				.append(",").append(volume)
-				.append("\n");
-		return sb.toString();
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import net.ionoff.forex.ea.model.Candle;
 import net.ionoff.forex.ea.model.Order;
 import net.ionoff.forex.ea.repository.CandleRepository;
 import net.ionoff.forex.ea.repository.OrderRepository;
-import net.ionoff.forex.ea.stratergy.ExtremaPointStrategy;
+import net.ionoff.forex.ea.stratergy.MovingAverageSupport;
 import net.ionoff.forex.ea.stratergy.MovingAverageStrategy;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +18,13 @@ public class ActionService {
 
     private OrderRepository orderRepository;
     private MovingAverageStrategy movingAverageStrategy;
-    private ExtremaPointStrategy extremaPointStrategy;
+    private MovingAverageSupport extremaPointStrategy;
     private CandleRepository candleRepository;
 
     public Action getAction() {
-        Action action = movingAverageStrategy.getAction(candleRepository.findLatest().orElse(null));
-        return action.isNoOrder() ? action : saveOrder(action);
+        Candle lastCandle = candleRepository.findLatest(Candle.Period.SHORT.name()).orElse(null);
+        Action action = movingAverageStrategy.getAction(lastCandle);
+        return action.isNone() ? action : saveOrder(action);
     }
 
     private Action saveOrder(Action action) {
@@ -34,10 +35,11 @@ public class ActionService {
     public Action getAction(Order order) {
         Order ticket = saveOrder(order);
         if (ticket.isClosed()) {
-            return Action.closeOrder(order);
+            return Action.close(order);
         }
-        Action action = movingAverageStrategy.getAction(ticket, candleRepository.findLatest().orElse(null));
-        return action.isNoOrder() ? action : saveOrder(action);
+        Candle lastCandle = candleRepository.findLatest(Candle.Period.SHORT.name()).orElse(null);
+        Action action = movingAverageStrategy.getAction(ticket, lastCandle);
+        return action.isNone() ? action : saveOrder(action);
     }
 
     private Order saveOrder(Order order) {

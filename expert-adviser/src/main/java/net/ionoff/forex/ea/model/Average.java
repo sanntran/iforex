@@ -18,9 +18,9 @@ public class Average {
 
     @Getter
     public enum Period {
-        SHORT(12, 6, 3),
-        MEDIUM(24, 6, 3),
-        LONG(36, 6, 3);
+        SHORT(8, 4, 3),
+        MEDIUM(14, 7, 4),
+        LONG(20, 10, 5);
         private final int avgPoints;
         private final int slopePoints;
         private final int slopeSlopePoints;
@@ -56,4 +56,20 @@ public class Average {
     @JoinColumn(name = "resistance", referencedColumnName = "id")
     private Candle resistance;
 
+    @Transient
+    public boolean isReady() {
+        return open != null
+                && close != null
+                && pivot != null
+                && average != null
+                && slope != null
+                && candle != null
+                && support != null
+                && resistance != null;
+    }
+
+    @Transient
+    public Double getReadableSlope() {
+        return slope == null ? null : slope * 100000;
+    }
 }

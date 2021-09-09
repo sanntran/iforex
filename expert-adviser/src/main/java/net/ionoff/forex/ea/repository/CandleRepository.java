@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,4 +36,8 @@ public interface CandleRepository extends JpaRepository<Candle, Long> {
     @Query(value = "SELECT * FROM candles WHERE id > :fromId AND id <= :toId AND period = :period ORDER BY close DESC, id DESC LIMIT 1",
             nativeQuery = true)
     Candle findHighest(@Param("period") String period, @Param("fromId") Long fromId, @Param("toId") Long toId);
+
+    @Query(value = "SELECT * FROM candles WHERE period = :period  AND time > :fromDate AND time < :toDate ORDER BY id",
+            nativeQuery = true)
+    List<Candle> findByDateRange(@Param("period") String period, @Param("fromDate") Instant fromDate, @Param("toDate") Instant toDate);
 }

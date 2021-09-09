@@ -6,8 +6,6 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Builder
@@ -22,8 +20,8 @@ public class Candle implements Entity {
 	@Getter
 	public enum Period {
 		SHORT("CANDLE", 1, Duration.ofMinutes(5)),
-		MEDIUM("CANDLE", 10, Duration.ofMinutes(50)),
-		LONG("CANDLE", 20, Duration.ofMinutes(100));
+		MEDIUM("CANDLE", 6, Duration.ofMinutes(30)),
+		LONG("CANDLE", 18, Duration.ofMinutes(90));
 		private final String type;
 		private final int size;
 		private final Duration duration;

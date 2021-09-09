@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
+import net.ionoff.forex.ea.model.Distance;
 import net.ionoff.forex.ea.model.Prediction;
 import net.ionoff.forex.ea.repository.AverageRepository;
+import net.ionoff.forex.ea.repository.CandleRepository;
 import net.ionoff.forex.ea.repository.PredictionRepository;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.springframework.stereotype.Component;
@@ -27,22 +29,24 @@ public class PredictionService {
 
     private AverageRepository averageRepository;
     private PredictionRepository predictionRepository;
+    private CandleRepository candleRepository;
 
-    public void createPrediction(Average average) {
+    public Optional<Prediction> createPrediction(Average average) {
         try {
             Prediction.Period period = Prediction.Period.valueOf(average.getPeriod().name());
-            createPrediction(average, period);
+            return createPrediction(average, period);
         } catch (Exception e) {
             log.error("Error when create prediction. {}", e.getMessage(), e);
+            return Optional.empty();
         }
     }
 
-    public void createPrediction(Average average, Prediction.Period period) {
+    public Optional<Prediction> createPrediction(Average average, Prediction.Period period) {
         Instant future = average.getTime().plus(period.getDuration());
         List<Average> averages = new ArrayList<>(
                 averageRepository.findLatest(period.name(), period.getAvgPoints() - 1));
         if (averages.size() < period.getAvgPoints() - 1) {
-            return;
+            return Optional.empty();
         }
         Average nextAvg = Average.builder()
                 .time(future)
@@ -54,14 +58,53 @@ public class PredictionService {
 
         Prediction newPrediction = Prediction.builder()
                 .time(average.getTime())
+                .candle(average.getCandle().getId())
                 .period(period)
                 .pivot(nextAvg.getPivot())
                 .average(nextAvg.getAverage())
                 .slope(nextAvg.getSlope())
                 .slopeSlope(calculateSlopeSlope(averages.subList(0, period.getSlopeSlopePoints())))
                 .build();
+        if (newPrediction.isShort() && newPrediction.getAverage() != null) {
+            predictDistance(newPrediction, Prediction.Period.MEDIUM.name());
 
+        } else if (newPrediction.isMedium() && newPrediction.getAverage() != null) {
+            predictDistance(newPrediction, Prediction.Period.LONG.name());
+        }
+        if (newPrediction.isShort() || newPrediction.isMedium()) {
+            List<Prediction> predictions = new ArrayList<>(
+                    predictionRepository.findLatest(period.name(), period.getSlopePoints() - 1));
+            if (averages.size() >= period.getSlopePoints() - 1) {
+                predictions.add(newPrediction);
+                newPrediction.setSlopeDistance(calculateSlopeDistance(predictions));
+            }
+        }
         predictionRepository.save(newPrediction);
+        return Optional.of(newPrediction);
+    }
+
+    private void predictDistance(Prediction newPrediction, String period) {
+        Optional<Prediction> prediction = predictionRepository.findLatest(period);
+        Optional<Average> average = averageRepository.findLatest(period);
+        Optional<Candle> candle = candleRepository.findLatest(period);
+        if (prediction.isPresent() && average.isPresent() && candle.isPresent()) {
+            Double predictDeltaAvg = ((double)candle.get().getSize() / (double)candle.get().getPeriod().getSize())
+                    * (prediction.get().getAverage() - average.get().getAverage());
+            Double distance = newPrediction.getAverage() - (prediction.get().getAverage() + predictDeltaAvg);
+            newPrediction.setDistance(distance);
+        }
+    }
+
+    private Double calculateSlopeDistance(List<Prediction> predictions) {
+        if (predictions.stream().anyMatch(p -> p.getDistance() == null)) {
+            return null;
+        }
+        SimpleRegression regression = new SimpleRegression();
+        // x: avg, y: time, y = slope * x + intercept
+        for (int i = predictions.size() - 1; i >= 0 ; i--) {
+            regression.addData(predictions.get(i).getTime().getEpochSecond(), predictions.get(i).getDistance());
+        }
+        return regression.getSlope();
     }
 
     private Double predictPivot(List<Average> averages, Instant future) {

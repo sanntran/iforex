@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 import static net.ionoff.forex.ea.service.PriceConverter.getPip;
@@ -28,17 +29,12 @@ public class StrategyService {
     private OrderRepository orderRepository;
     private ResultRepository resultRepository;
     private CandleRepository candleRepository;
-    private CandleEventNotifier candleEventNotifier;
     private MovingAverageStrategy movingAverageStrategy;
 
-    public Message testStrategy() {
-        for (long id = 1; true; id++) {
-            Candle candle = candleRepository.findById(id).orElse(null);
-            if (candle == null) {
-                break;
-            }
-            candleEventNotifier.fireCandleEvent(new CandleClosedEvent(candle));
-            Order order = orderRepository.findLatest().orElse(null);
+    public Message testStrategy(Instant fromDate, Instant toDate) {
+        List<Candle> candles = candleRepository.findByDateRange(Candle.Period.SHORT.name(), fromDate, toDate);
+        for (Candle candle : candles) {
+            Order order = orderRepository.findOpen().orElse(null);
             Action action = order != null && order.isOpen()
                     ? movingAverageStrategy.getAction(order, candle)
                     : movingAverageStrategy.getAction(candle);

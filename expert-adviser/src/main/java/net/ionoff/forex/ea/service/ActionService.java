@@ -43,15 +43,15 @@ public class ActionService {
     }
 
     private Order saveOrder(Order order) {
-        Optional<Order> ticket = orderRepository.findLatest();
+        Optional<Order> ticket = orderRepository.findOpen();
         if (!ticket.isPresent() || ticket.get().isClosed()) {
             return orderRepository.save(Order.builder()
                     .ticket(order.getTicket())
-                    .openTime(order.getOpenTime())
-                    .openPrice(order.getOpenPrice())
                     .lots(order.getLots())
                     .type(order.getType())
                     .swap(order.getSwap())
+                    .openTime(order.getOpenTime())
+                    .openPrice(order.getOpenPrice())
                     .takeProfit(order.getTakeProfit())
                     .stopLoss(order.getStopLoss())
                     .comment(order.getComment())

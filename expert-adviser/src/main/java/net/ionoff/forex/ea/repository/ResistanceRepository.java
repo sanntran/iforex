@@ -16,4 +16,8 @@ public interface ResistanceRepository extends JpaRepository<Resistance, Long> {
     @Query(value = "SELECT * FROM resistances WHERE period=:period ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
     Optional<Resistance> findLatest(@Param("period") String period);
+
+    @Query(value = "SELECT * FROM resistances WHERE candle <= :candle AND period = :period ORDER BY id DESC LIMIT 1",
+            nativeQuery = true)
+    Optional<Resistance> findByCandle(@Param("candle") Long candle, @Param("period") String period);
 }

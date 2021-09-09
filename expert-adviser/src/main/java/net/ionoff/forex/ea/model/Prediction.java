@@ -16,9 +16,9 @@ public class Prediction {
 
     @Getter
     public enum Period {
-        SHORT(8, 4, 3, Duration.ofMinutes(5)),
-        MEDIUM(14, 7, 4, Duration.ofMinutes(50)),
-        LONG(20, 10, 5, Duration.ofMinutes(100));
+        SHORT(8, 6, 3, Duration.ofMinutes(6)),
+        MEDIUM(14, 8, 4, Duration.ofMinutes(30)),
+        LONG(20, 10, 5, Duration.ofMinutes(90));
         private final int avgPoints;
         private final int slopePoints;
         private final int slopeSlopePoints;
@@ -34,12 +34,13 @@ public class Prediction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private Long candle;
     @Enumerated(value = EnumType.STRING)
     private Period period;
     private Instant time;
     private Double pivot;
-    private Double average;
     private Double slope;
+    private Double average;
     private Double distance;
     private Double slopeSlope;
     private Double slopeDistance;
@@ -49,7 +50,16 @@ public class Prediction {
         return pivot != null
             && average != null
             && slope != null
-            && distance != null
             && slopeSlope != null;
+    }
+
+    @Transient
+    public boolean isShort() {
+        return Period.SHORT.equals(period);
+    }
+
+    @Transient
+    public boolean isMedium() {
+        return Period.MEDIUM.equals(period);
     }
 }

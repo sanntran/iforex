@@ -1,21 +1,24 @@
 package net.ionoff.forex.ea.stratergy;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
-@Builder
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
-@AllArgsConstructor
 public class BinaryDecisionTree {
 
-    private BinaryDecisionNode root;
+    private final List<BinaryDecisionNode> nodes = new ArrayList<>();
 
     public BinaryDecisionNode.FinalDecision getDecision(IStrategyAnalyzer analyzer) {
-        if (root == null) {
-            return BinaryDecisionNode.FinalDecision.NONE;
+        for (BinaryDecisionNode node : nodes) {
+            if (node.isTrue(analyzer)) {
+                return node.getDecision(analyzer);
+            }
         }
-        return root.getDecision(analyzer);
+        if (!nodes.isEmpty()) {
+            return BinaryDecisionNode.FinalDecision.ofNone(nodes.get(nodes.size() - 1));
+        }
+        return BinaryDecisionNode.FinalDecision.ofNone(null);
     }
-
 }

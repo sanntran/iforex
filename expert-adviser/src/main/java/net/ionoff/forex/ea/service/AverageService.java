@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
+import net.ionoff.forex.ea.model.Prediction;
 import net.ionoff.forex.ea.repository.AverageRepository;
 import net.ionoff.forex.ea.repository.CandleRepository;
 import org.apache.commons.math3.stat.regression.SimpleRegression;

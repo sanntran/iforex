@@ -2,6 +2,8 @@ package net.ionoff.forex.ea.stratergy;
 
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
@@ -9,52 +11,74 @@ import lombok.*;
 @NoArgsConstructor
 public class BinaryDecisionNode {
 
-    @Getter
     @AllArgsConstructor
-    public static class FinalDecision extends BinaryDecisionNode {
-        public static final FinalDecision NONE = ofAction("none");
-
-        private String action;
-
+    public static class FinalDecision {
+        private String result;
+        private BinaryDecisionNode node;
         public boolean isNone() {
-            return "none".equals(action);
+            return "none".equals(result);
+        }
+        public boolean isClose() {
+            return "close".equals(result);
+        }
+        public boolean isSell() {
+            return "sell".equals(result);
+        }
+        public boolean isBuy() {
+            return "buy".equals(result);
         }
 
-        @Override
-        public FinalDecision getDecision(IStrategyAnalyzer analyzer) {
-            if (analyzer.isYes(getQuestion())) {
-                return this;
-            }
-            return NONE;
+        public static FinalDecision ofNone(BinaryDecisionNode node) {
+            return new FinalDecision("none", node);
         }
 
-        @Override
-        public boolean isFinalDecision() {
-            return true;
+        public static FinalDecision ofResult(String result, BinaryDecisionNode node) {
+            return new FinalDecision(result, node);
         }
 
-
-        public static FinalDecision ofAction(String action) {
-            return new FinalDecision(action);
+        public String getPath() {
+            return node.getPath() + ": " + result;
         }
     }
 
-    private String question;
-    private BinaryDecisionNode trueNode;
-    private BinaryDecisionNode falseNode;
+    private String action;
+    private String method;
+    private Boolean answer;
+    private BinaryDecisionNode parent;
+    private List<BinaryDecisionNode> nodes;
+
+    public Boolean isTrue(IStrategyAnalyzer analyzer) {
+        if (method == null) {
+            throw new IllegalStateException("Method cannot be null");
+        }
+        answer = analyzer.invoke(method);
+        return answer;
+    }
 
     public FinalDecision getDecision(IStrategyAnalyzer analyzer) {
-        boolean yes = analyzer.isYes(question);
-        if (yes && trueNode != null) {
-            return trueNode.getDecision(analyzer);
+        if (!Boolean.TRUE.equals(answer)) {
+            throw new IllegalStateException("Cannot make decision when answer is false");
         }
-        if (!yes && falseNode != null) {
-            return falseNode.getDecision(analyzer);
+        if (action == null) {
+            for (BinaryDecisionNode node : nodes) {
+                if (node.isTrue(analyzer)) {
+                    return node.getDecision(analyzer);
+                }
+            }
+            return FinalDecision.ofNone(nodes.get(nodes.size() - 1));
+        } else {
+            return FinalDecision.ofResult(action, this);
         }
-        return FinalDecision.NONE;
     }
 
-    public boolean isFinalDecision() {
-        return false;
+    public boolean isRoot() {
+        return parent == null;
+    }
+
+    public String getPath() {
+        if (isRoot()) {
+            return method;
+        }
+        return getParent().getPath() + "." + method;
     }
 }

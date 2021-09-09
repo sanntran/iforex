@@ -2,23 +2,38 @@ truncate table forex.candles;
 truncate table forex.averages;
 truncate table forex.supports;
 truncate table forex.resistances;
-truncate table forex.orders;
+
 truncate table forex.predictions;
 truncate table forex.results;
 truncate table forex.ticks;
 
+truncate table forex.orders;
+
 select * from forex.predictions;
 select * from forex.predictions where period='SHORT';
-select * from forex.predictions where period='MEDIUM';
+select * from forex.predictions where period='MEDIUM' order by id desc;
 select * from forex.predictions where period='LONG';
 
 select * from forex.averages where period='SHORT';
 select * from forex.averages where period='MEDIUM';
 select * from forex.averages where period='LONG';
+SELECT count(*) FROM forex.averages WHERE period='LONG';
+
+SELECT
+  time AS "time",
+  distance * 100000 AS slope_distance_avg_short_avg_long
+FROM forex.predictions
+WHERE
+  period='SHORT'
+	and slope_distance is not null
+ORDER BY time desc limit 100;
+
+select * from forex.orders;
 
 select * from forex.candles where period='SHORT';
 SELECT * FROM forex.candles WHERE period='MEDIUM';
 SELECT * FROM forex.candles WHERE period='LONG';
+SELECT count(*) FROM forex.candles WHERE period='LONG';
 
 select avg(high-low) from forex.candles;
 

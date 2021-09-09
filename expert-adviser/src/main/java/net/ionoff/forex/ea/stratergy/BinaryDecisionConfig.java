@@ -16,37 +16,35 @@ public class BinaryDecisionConfig {
         Map<String, Object> decisionMap = factory.getObject();
         if (decisionMap != null) {
             for (String key : decisionMap.keySet()) {
-                BinaryDecisionNode root = newBinaryDecisionNode(key, decisionMap.get(key));
-                decisionTrees.add(new BinaryDecisionTree(root));
+                BinaryDecisionTree tree = new BinaryDecisionTree();
+                BinaryDecisionNode node = newBinaryDecisionNode(null, key, decisionMap.get(key));
+                tree.getNodes().add(node);
+                decisionTrees.add(tree);
             }
         }
         return decisionTrees;
     }
 
-    private static BinaryDecisionNode newBinaryDecisionNode(String question, Object node) {
-        if (node instanceof String) {
-            return BinaryDecisionNode.FinalDecision.ofAction(node.toString());
+    private static BinaryDecisionNode newBinaryDecisionNode(BinaryDecisionNode parent, String question, Object obj) {
+        if (obj instanceof String) {
+            return BinaryDecisionNode.builder()
+                    .parent(parent)
+                    .action(obj.toString())
+                    .method(question)
+                    .parent(parent)
+                    .build();
         }
-        LinkedHashMap linkedHashMap = (LinkedHashMap) node;
+        LinkedHashMap linkedHashMap = (LinkedHashMap) obj;
         Set keys = linkedHashMap.keySet();
-        int index = 0;
-        BinaryDecisionNode trueNode = null;
-        BinaryDecisionNode falseNode = null;
-        for (Object key : keys) {
-            if (index == 0) {
-                trueNode = newBinaryDecisionNode(key.toString(), linkedHashMap.get(key));
-            } else if (index == 1) {
-                falseNode = newBinaryDecisionNode(key.toString(), linkedHashMap.get(key));
-            } else if (index > 1) {
-                log.warn("!!!!! Node {} is ignored as node {} expects no more than 2 children nodes", key, question);
-            }
-            index++;
-        }
-        return BinaryDecisionNode.builder()
-                .question(question)
-                .trueNode(trueNode)
-                .falseNode(falseNode)
+        List<BinaryDecisionNode> nodes = new ArrayList<>();
+        BinaryDecisionNode newNode = BinaryDecisionNode.builder()
+                .parent(parent)
+                .method(question)
+                .nodes(nodes)
                 .build();
-
+        for (Object key : keys) {
+            newNode.getNodes().add(newBinaryDecisionNode(newNode, key.toString(), linkedHashMap.get(key)));
+        }
+        return newNode;
     }
 }

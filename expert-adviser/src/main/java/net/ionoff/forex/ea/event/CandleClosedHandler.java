@@ -3,10 +3,11 @@ package net.ionoff.forex.ea.event;
 import lombok.AllArgsConstructor;
 import net.ionoff.forex.ea.model.Average;
 import net.ionoff.forex.ea.model.Candle;
-import net.ionoff.forex.ea.repository.CandleRepository;
+import net.ionoff.forex.ea.model.Prediction;
 import net.ionoff.forex.ea.service.AverageService;
-import net.ionoff.forex.ea.service.ExtremaService;
 import net.ionoff.forex.ea.service.PredictionService;
+import net.ionoff.forex.ea.service.ResistanceService;
+import net.ionoff.forex.ea.service.SupportService;
 import org.springframework.stereotype.Component;
 
 import java.util.Observable;
@@ -18,8 +19,9 @@ import java.util.Optional;
 public class CandleClosedHandler implements Observer {
 
 	private AverageService averageService;
-	private ExtremaService extremaService;
 	private PredictionService predictionService;
+	private SupportService supportService;
+	private ResistanceService resistanceService;
 
 	@Override
 	public void update(Observable o, Object arg) {
@@ -32,7 +34,10 @@ public class CandleClosedHandler implements Observer {
 
 	private void onCandleClosed(Candle candle) {
 		Optional<Average> average = averageService.createAverage(candle);
-		average.ifPresent(avg -> extremaService.createSupportAndResistance(avg));
-		average.ifPresent(avg -> predictionService.createPrediction(avg));
+		Optional<Prediction> prediction = average.isPresent() ? predictionService.createPrediction(average.get()) : Optional.empty();
+		prediction.ifPresent(p -> {
+			supportService.updateSupport(average.get(), p);
+			resistanceService.updateResistance(average.get(), p);
+		});
 	}
 }

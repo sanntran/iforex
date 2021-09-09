@@ -22,11 +22,11 @@ public class MovingAverageSummary {
     private Resistance resistanceMedium;
     private Resistance resistanceLong;
 
-    public boolean isReady() {
+    boolean isReady() {
         return isShortReady() && isMediumReady();
     }
 
-    private boolean isShortReady() {
+    boolean isShortReady() {
         return candle != null
                 && avgShort != null
                 && avgShort.isReady()
@@ -36,7 +36,7 @@ public class MovingAverageSummary {
                 && resistanceShort != null;
     }
 
-    private boolean isMediumReady() {
+    boolean isMediumReady() {
         return avgMedium != null
                 && avgMedium.isReady()
                 && predictMedium != null
@@ -45,12 +45,48 @@ public class MovingAverageSummary {
                 && resistanceMedium != null;
     }
 
-    private boolean isLongReady() {
+    boolean isLongReady() {
         return avgLong != null
                 && avgLong.isReady()
                 && supportLong != null
                 && predictLong != null
                 && predictLong.isReady()
                 && resistanceLong != null;
+    }
+
+    Distance getDistanceAvgShortAvgMedium() {
+        return Distance.of(avgShort.getAverage(), avgMedium.getAverage());
+    }
+
+    Distance getDistanceAvgMediumAvgLong() {
+        return Distance.of(avgMedium.getAverage(), avgLong.getAverage());
+    }
+
+    Distance getDistanceCloseAvgShort() {
+        return Distance.of(candle.getClose(), avgShort.getAverage());
+    }
+
+    Slope getPredictSlopeShort() {
+        return Slope.of(predictShort.getSlope(), predictShort.getPeriod().name());
+    }
+
+    Slope getPredictSlopeSlopeShort() {
+        return Slope.of(predictShort.getSlopeSlope(), predictShort.getPeriod().name());
+    }
+
+    Slope getPredictSlopeMedium() {
+        return Slope.of(predictMedium.getSlope(), predictMedium.getPeriod().name());
+    }
+
+    Slope getPredictSlopeSlopeMedium() {
+        return Slope.of(predictMedium.getSlopeSlope(), predictMedium.getPeriod().name());
+    }
+
+    Slope getPredictSlopeLong() {
+        return Slope.of(predictLong.getSlope(), predictLong.getPeriod().name());
+    }
+
+    Slope getPredictSlopeSlopeLong() {
+        return Slope.of(predictLong.getSlopeSlope(), predictLong.getPeriod().name());
     }
 }

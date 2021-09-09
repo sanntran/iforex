@@ -16,7 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByTicket(@Param("ticket") Long ticket);
 
 
-    @Query(value = "SELECT * FROM orders ORDER BY id DESC LIMIT 1",
+    @Query(value = "SELECT * FROM orders WHERE close_time IS NULL AND close_price IS NULL ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
-    Optional<Order> findLatest();
+    Optional<Order> findOpen();
 }

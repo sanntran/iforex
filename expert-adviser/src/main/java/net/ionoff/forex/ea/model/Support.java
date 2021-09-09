@@ -18,7 +18,7 @@ import java.time.Instant;
 public class Support {
 
     public enum Period {
-        SHORT(0.00236), MEDIUM(0.00236), LONG(0.00118);
+        SHORT(0.001), MEDIUM(0.001), LONG(0.001);
         private final double slope;
         Period(double slope) {
             this.slope = slope;

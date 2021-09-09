@@ -23,18 +23,18 @@ public class MovingAverageSupport {
     public MovingAverageSummary getMovingAverage(Candle candle) {
         return MovingAverageSummary.builder()
                 .candle(candle)
-                .avgShort(averageRepository.findLatest(Average.Period.SHORT.name()).orElse(null))
-                .avgMedium(averageRepository.findLatest(Average.Period.MEDIUM.name()).orElse(null))
-                .avgLong(averageRepository.findLatest(Average.Period.LONG.name()).orElse(null))
-                .predictShort(predictionRepository.findLatest(Prediction.Period.SHORT.name()).orElse(null))
-                .predictMedium(predictionRepository.findLatest(Prediction.Period.MEDIUM.name()).orElse(null))
-                .predictLong(predictionRepository.findLatest(Prediction.Period.LONG.name()).orElse(null))
-                .supportShort(supportRepository.findLatest(Support.Period.SHORT.name()).orElse(null))
-                .supportMedium(supportRepository.findLatest(Support.Period.MEDIUM.name()).orElse(null))
-                .supportLong(supportRepository.findLatest(Support.Period.LONG.name()).orElse(null))
-                .resistanceShort(resistanceRepository.findLatest(Resistance.Period.SHORT.name()).orElse(null))
-                .resistanceMedium(resistanceRepository.findLatest(Resistance.Period.MEDIUM.name()).orElse(null))
-                .resistanceLong(resistanceRepository.findLatest(Resistance.Period.LONG.name()).orElse(null))
+                .avgShort(averageRepository.findByCandle(candle.getId(), Average.Period.SHORT.name()).orElse(null))
+                .avgMedium(averageRepository.findByCandle(candle.getId(), Average.Period.MEDIUM.name()).orElse(null))
+                .avgLong(averageRepository.findByCandle(candle.getId(), Average.Period.LONG.name()).orElse(null))
+                .predictShort(predictionRepository.findByCandle(candle.getId(), Prediction.Period.SHORT.name()).orElse(null))
+                .predictMedium(predictionRepository.findByCandle(candle.getId(), Prediction.Period.MEDIUM.name()).orElse(null))
+                .predictLong(predictionRepository.findByCandle(candle.getId(), Prediction.Period.LONG.name()).orElse(null))
+                .supportShort(supportRepository.findByCandle(candle.getId(), Support.Period.SHORT.name()).orElse(null))
+                .supportMedium(supportRepository.findByCandle(candle.getId(), Support.Period.MEDIUM.name()).orElse(null))
+                .supportLong(supportRepository.findByCandle(candle.getId(), Support.Period.LONG.name()).orElse(null))
+                .resistanceShort(resistanceRepository.findByCandle(candle.getId(), Resistance.Period.SHORT.name()).orElse(null))
+                .resistanceMedium(resistanceRepository.findByCandle(candle.getId(), Resistance.Period.MEDIUM.name()).orElse(null))
+                .resistanceLong(resistanceRepository.findByCandle(candle.getId(), Resistance.Period.LONG.name()).orElse(null))
                 .build();
     }
 
@@ -76,12 +76,7 @@ public class MovingAverageSupport {
         return Math.abs(getPip(order.getOpenPrice() - order.getStopLoss()));
     }
 
-    public MovingAverageAnalyzer newMovingAverageAnalyzer(Candle candle) {
-        return newMovingAverageAnalyzer(null, candle);
-    }
-
-    public MovingAverageAnalyzer newMovingAverageAnalyzer(Order order, Candle candle) {
-        MovingAverageSummary ma = getMovingAverage(candle);
+    public MovingAverageAnalyzer newMovingAverageAnalyzer(Order order, MovingAverageSummary ma) {
         return MovingAverageAnalyzer.builder()
                 .order(order)
                 .ma(ma)

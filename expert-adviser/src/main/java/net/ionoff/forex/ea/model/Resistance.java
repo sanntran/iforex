@@ -1,9 +1,6 @@
 package net.ionoff.forex.ea.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -15,12 +12,11 @@ import java.time.Instant;
 @javax.persistence.Entity
 @Table(name = "resistances")
 public class Resistance {
+    @Getter
+    @AllArgsConstructor
     public enum Period {
-        SHORT(-0.00236), MEDIUM(-0.00236), LONG(-0.00118);
+        SHORT(-0.001), MEDIUM(-0.001), LONG(-0.001);
         private final double slope;
-        Period(double slope) {
-            this.slope = slope;
-        }
         public double getSlope() {
             return slope;
         }

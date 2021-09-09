@@ -23,7 +23,7 @@ public interface AverageRepository extends JpaRepository<Average, Long> {
             nativeQuery = true)
     List<Average> findLatest(@Param("period") String period, @Param("limit") Integer limit);
 
-    @Query(value = "SELECT * FROM averages WHERE period=:period ORDER BY id DESC LIMIT 1 OFFSET 1",
+    @Query(value = "SELECT * FROM averages WHERE candle <= :candle AND period=:period ORDER BY id DESC LIMIT 1 OFFSET 1",
             nativeQuery = true)
-    Optional<Average> findPrevious(@Param("period") String period);
+    Optional<Average> findByCandle(@Param("candle") Long candle, @Param("period") String period);
 }

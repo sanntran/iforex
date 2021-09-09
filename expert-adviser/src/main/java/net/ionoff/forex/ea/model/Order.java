@@ -57,8 +57,6 @@ public class Order {
 	private Instant expiration;
 	@Transient
 	private List<Event> events;
-	@Column(nullable = false, columnDefinition = "TINYINT(1)")
-	private Boolean waitingForClose;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "candle", referencedColumnName = "id")
@@ -86,13 +84,6 @@ public class Order {
 	@Transient
 	public boolean isBuy() {
 		return TYPE.BUY.value.equals(type);
-	}
-
-
-	@JsonIgnore
-	@Transient
-	public boolean isWaitingForClose() {
-		return Boolean.TRUE.equals(waitingForClose);
 	}
 
 	@Override

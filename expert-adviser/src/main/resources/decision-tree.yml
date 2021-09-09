@@ -1,5 +1,28 @@
-isPredictShortAvgGoingDown:
-  isShortAvgGoingDown:
-    isGoingUp: sell
-    isGoinDown:
-      isAvgLongGoingUp: sell
+isPredictAvgLongStoppingGoingUp:
+  isPredictAvgMediumStartGoingDown:
+    isPredictAvgMediumHigherThanAvgLong:
+      isPredictAvgShortHigherThanAvgMedium:
+        isPredictPriceCloseToAvgShort:
+          hasNoOrder: sell
+          hasOrderBuy: close
+      isPredictAvgShortLowerThanAvgMedium:
+        isPredictPriceCloseToAvgMedium:
+          hasNoOrder: sell
+          hasOrderBuy: close
+isPredictAvgLongStoppingGoingDown:
+  isPredictAvgMediumStartGoingUp:
+    isPredictAvgMediumLowerThanAvgLong:
+      isPredictAvgShortLowerThanAvgMedium:
+        isPredictPriceCloseToAvgShort:
+          hasNoOrder: buy
+          hasOrderSell: close
+      isPredictAvgShortHigherThanAvgMedium:
+        isPredictPriceCloseToAvgMedium:
+          hasNoOrder: buy
+          hasOrderSell: close
+isPredictAvgMediumGoingUpSuperFast:
+  isPredictAvgMediumStoppingGoingUp:
+    hasOrderBuy: close
+isPredictAvgMediumGoingDownSuperFast:
+  isPredictAvgMediumStoppingGoingDown:
+    hasOrderSell: close

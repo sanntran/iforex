@@ -24,56 +24,9 @@ public class ExtremaService {
 
     private CandleRepository candleRepository;
     private SupportRepository supportRepository;
-    private AverageRepository averageRepository;
     private ResistanceRepository resistanceRepository;
 
-    public void createSupportAndResistance(Average newAvg) {
-        if (newAvg.getClose() == null || newAvg.getSlope() == null) {
-            return;
-        }
-        final String candlePeriod = Candle.Period.SHORT.name();
-        final Support.Period supportPeriod = Support.Period.valueOf(newAvg.getPeriod().name());
-        final Resistance.Period resistancePeriod = Resistance.Period.valueOf(newAvg.getPeriod().name());
-        final Support currentSupport = supportRepository.findLatest(supportPeriod.name()).orElseGet(()-> {
-            Candle lowestCandle = candleRepository.findLowest(candlePeriod, 0L, newAvg.getCandle().getId());
-            return createSupport(lowestCandle, supportPeriod);
-        });
-        final Resistance currentResistance = resistanceRepository.findLatest(resistancePeriod.name()).orElseGet(()-> {
-            Candle highestCandle = candleRepository.findHighest(candlePeriod, 0L, newAvg.getCandle().getId());
-            return createResistance(highestCandle, resistancePeriod);
-        });
-        newAvg.setResistance(currentResistance.getCandle());
-        newAvg.setSupport(currentSupport.getCandle());
-
-        if (hasNewSupport(supportPeriod, newAvg)
-                && currentSupport.getTime().isBefore(currentResistance.getTime())) {
-            // go backward to the resistance and find the lowest candle, it's support
-            Long resistanceCandle = currentResistance.getCandle().getId();
-            Candle lowestCandle = candleRepository.findLowest(candlePeriod, resistanceCandle, newAvg.getCandle().getId());
-            Support newSupport = createSupport(lowestCandle, supportPeriod);
-            newAvg.setSupport(newSupport.getCandle());
-        } else if (hasNewResistance(resistancePeriod, newAvg)
-            && currentResistance.getTime().isBefore(currentSupport.getTime())) {
-            // go backward to the support and find the highest candle, it's support
-            Long supportCandle = currentSupport.getCandle().getId();
-            Candle highestCandle = candleRepository.findHighest(candlePeriod, supportCandle, newAvg.getCandle().getId());
-            Resistance newResistance = createResistance(highestCandle, resistancePeriod);
-            newAvg.setResistance(newResistance.getCandle());
-        }
-        averageRepository.save(newAvg);
-    }
-
-    private boolean hasNewSupport(Support.Period period, Average newAvg) {
-        return newAvg.getSlope() != null
-                && getPip(newAvg.getSlope()) >= period.getSlope();
-    }
-
-    private boolean hasNewResistance(Resistance.Period period, Average newAvg) {
-        return newAvg.getSlope() != null
-                && getPip(newAvg.getSlope()) <= period.getSlope();
-    }
-
-    private Support createSupport(Candle candle, Support.Period period) {
+    public Support createSupport(Candle candle, Support.Period period) {
         return supportRepository.save(
                 Support.builder()
                         .candle(candle)
@@ -84,7 +37,21 @@ public class ExtremaService {
         );
     }
 
-    private Resistance createResistance(Candle candle, Resistance.Period period) {
+    public Support getOrCreateSupport(Candle candle, Support.Period period) {
+        return supportRepository.findLatest(period.name()).orElseGet(()-> {
+            Candle lowestCandle = candleRepository.findLowest(period.name(), 0L, candle.getId());
+            return createSupport(lowestCandle, period);
+        });
+    }
+
+    public Resistance getOrCreateResistance(Candle candle, Resistance.Period period) {
+        return resistanceRepository.findLatest(period.name()).orElseGet(()-> {
+            Candle highestCandle = candleRepository.findHighest(period.name(), 0L, candle.getId());
+            return createResistance(highestCandle, period);
+        });
+    }
+
+    public Resistance createResistance(Candle candle, Resistance.Period period) {
         return resistanceRepository.save(
                 Resistance.builder()
                         .candle(candle)

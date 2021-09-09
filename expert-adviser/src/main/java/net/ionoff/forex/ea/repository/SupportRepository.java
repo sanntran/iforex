@@ -13,7 +13,11 @@ import java.util.Optional;
 @Transactional
 public interface SupportRepository extends JpaRepository<Support, Long> {
 
-    @Query(value = "SELECT * FROM supports WHERE period=:period ORDER BY id DESC LIMIT 1",
+    @Query(value = "SELECT * FROM supports WHERE period = :period ORDER BY id DESC LIMIT 1",
             nativeQuery = true)
     Optional<Support> findLatest(@Param("period") String period);
+
+    @Query(value = "SELECT * FROM supports WHERE candle <= :candle AND period = :period ORDER BY id DESC LIMIT 1",
+            nativeQuery = true)
+    Optional<Support> findByCandle(@Param("candle") Long candle, @Param("period") String period);
 }

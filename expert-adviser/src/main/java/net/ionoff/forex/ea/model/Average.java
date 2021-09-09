@@ -16,10 +16,11 @@ import static net.ionoff.forex.ea.service.PriceConverter.getPip;
 @Table(name = "averages")
 public class Average {
 
+
     @Getter
     public enum Period {
-        SHORT(8, 4, 3),
-        MEDIUM(14, 7, 4),
+        SHORT(10, 6, 3),
+        MEDIUM(14, 8, 4),
         LONG(20, 10, 5);
         private final int avgPoints;
         private final int slopePoints;
@@ -68,8 +69,15 @@ public class Average {
                 && resistance != null;
     }
 
+
+
     @Transient
-    public Double getReadableSlope() {
-        return slope == null ? null : slope * 100000;
+    public boolean isShort() {
+        return Period.SHORT.equals(period);
+    }
+
+    @Transient
+    public boolean isMedium() {
+        return Period.MEDIUM.equals(period);
     }
 }
